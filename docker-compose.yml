@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  cat-breed-classifier:
+    build: .
+    container_name: kedi-cins-tahmini
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./runs/resnet50/weights/best.pth:/app/runs/resnet50/weights/best.pth:ro
+      - ./uploads:/app/uploads
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]

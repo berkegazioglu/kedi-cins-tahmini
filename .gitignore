@@ -1,0 +1,52 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environment
+.venv/
+venv/
+ENV/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Model files (too large for git)
+*.pth
+*.pt
+!yolo11n.pt
+
+# Data
+images/
+images_split/
+data/
+*.csv
+
+# Training outputs
+runs/*/weights/*.pth
+runs/*/plots/
+runs/*/evaluation/
+
+# Logs
+*.log
+training_log.txt
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Uploads
+uploads/
+
+# Archive
+archive/
+
+# Temp files
+*.tmp
+*.bak
