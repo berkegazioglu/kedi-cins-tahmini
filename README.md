@@ -2,7 +2,29 @@
 
 Derin öğrenme kullanarak kedi fotoğraflarından cins tahmini yapan bir yapay zeka projesidir. ResNet-50 transfer learning modeli ile 59 farklı kedi cinsini yüksek doğrulukla tanır.
 
-## 📊 Proje Özeti
+## � Hızlı Başlangıç (Docker - Önerilen)
+
+```bash
+# 1. Projeyi klonlayın
+git clone https://github.com/KULLANICI_ADINIZ/kedi-cins-tahmini.git
+cd kedi-cins-tahmini
+
+# 2. Docker container'ı başlatın (Windows)
+.\deploy.ps1
+
+# Linux/Mac için
+chmod +x deploy.sh
+./deploy.sh
+
+# 3. Tarayıcıda açın
+http://localhost:8501
+```
+
+**Not:** Docker kullanımı için detaylı bilgi: [README_DOCKER.md](README_DOCKER.md)
+
+---
+
+## �📊 Proje Özeti
 
 - **Model**: ResNet-50 (ImageNet pretrained, transfer learning)
 - **Framework**: PyTorch + torchvision
