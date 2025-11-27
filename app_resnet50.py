@@ -109,7 +109,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Model yolu
-MODEL_PATH = 'runs/resnet50/weights/best.pth'
+MODEL_PATH = 'runs/resnet50_v2/weights/best.pth'  # Updated to v2 model (Epoch 23, 64.67% val acc)
 YOLO_MODEL_PATH = 'yolo11n.pt'  # Pre-trained YOLO for object detection
 
 @st.cache_resource
@@ -185,10 +185,13 @@ def load_resnet50_model(model_path):
         num_classes = len(checkpoint['class_names'])
         class_names = checkpoint['class_names']
         
-        # Create model
+        # Create model with same architecture as train_resnet50_v2.py
         model = models.resnet50(pretrained=False)
         num_ftrs = model.fc.in_features
-        model.fc = nn.Linear(num_ftrs, num_classes)
+        model.fc = nn.Sequential(
+            nn.Dropout(0.5),
+            nn.Linear(num_ftrs, num_classes)
+        )
         model.load_state_dict(checkpoint['model_state_dict'])
         model = model.to(device)
         model.eval()
