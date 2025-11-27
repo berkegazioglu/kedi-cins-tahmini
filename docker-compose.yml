@@ -1,16 +1,18 @@
 version: '3.8'
 
 services:
-  cat-breed-classifier:
+  # ResNet50 App (Default)
+  resnet50:
     build: .
-    container_name: kedi-cins-tahmini
+    container_name: kedi-resnet50
     ports:
       - "8501:8501"
     volumes:
-      - ./runs/resnet50/weights/best.pth:/app/runs/resnet50/weights/best.pth:ro
+      - ./runs/resnet50_v2/weights/best.pth:/app/runs/resnet50_v2/weights/best.pth:ro
       - ./uploads:/app/uploads
     environment:
       - PYTHONUNBUFFERED=1
+    command: ["streamlit", "run", "app_resnet50.py", "--server.port=8501", "--server.address=0.0.0.0", "--server.headless=true"]
     restart: unless-stopped
     deploy:
       resources:
@@ -19,3 +21,49 @@ services:
             - driver: nvidia
               count: 1
               capabilities: [gpu]
+  
+  # Ensemble App (3 CNN Models)
+  ensemble:
+    build: .
+    container_name: kedi-ensemble
+    ports:
+      - "8502:8501"
+    volumes:
+      - ./runs/ensemble:/app/runs/ensemble:ro
+      - ./uploads:/app/uploads
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: ["streamlit", "run", "app_ensemble.py", "--server.port=8501", "--server.address=0.0.0.0", "--server.headless=true"]
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    profiles:
+      - ensemble
+  
+  # Super Ensemble App (5 Models - Dengeli Yol)
+  super-ensemble:
+    build: .
+    container_name: kedi-super-ensemble
+    ports:
+      - "8503:8501"
+    volumes:
+      - ./runs/super_ensemble:/app/runs/super_ensemble:ro
+      - ./uploads:/app/uploads
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: ["streamlit", "run", "app_ensemble.py", "--server.port=8501", "--server.address=0.0.0.0", "--server.headless=true"]
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    profiles:
+      - super
