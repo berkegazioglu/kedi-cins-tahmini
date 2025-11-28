@@ -17,8 +17,8 @@ env/
 *.swo
 *~
 
-# Model files (too large for git)
-*.pth
+# Model files - now tracked by Git LFS
+# *.pth files are tracked via Git LFS (.gitattributes)
 *.pt
 !yolo11n.pt
 
@@ -28,8 +28,8 @@ images_split/
 data/
 *.csv
 
-# Training outputs
-runs/*/weights/*.pth
+# Training outputs - weights now tracked by Git LFS
+# runs/*/weights/*.pth tracked via Git LFS
 runs/*/plots/
 runs/*/evaluation/
 
