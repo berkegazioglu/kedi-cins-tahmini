@@ -88,7 +88,29 @@ git clone https://github.com/berkegazioglu/kedi-cins-tahmini.git
 cd kedi-cins-tahmini
 ```
 
-#### 2. Docker Image Build Edin
+#### 2. Model Dosyalarını İndirin (Git LFS)
+Proje model dosyalarını **Git LFS** (Large File Storage) ile yönetir. Model dosyalarını indirmek için:
+
+```bash
+# Git LFS'i yükleyin (henüz yüklü değilse)
+# Windows (Git for Windows ile gelir)
+# Linux: sudo apt-get install git-lfs
+# Mac: brew install git-lfs
+
+# Git LFS'i başlatın
+git lfs install
+
+# Model dosyalarını çekin
+git lfs pull
+```
+
+**Not**: `git clone` komutu otomatik olarak LFS dosyalarını çeker, ancak bazı durumlarda `git lfs pull` komutunu manuel olarak çalıştırmanız gerekebilir.
+
+**İndirilen Modeller**:
+- `runs/resnet50_v2/weights/best.pth` (270 MB) - ResNet50 model, %64.67 accuracy
+- `runs/optimal_ensemble/optimal_ensemble_final.pth` (122 MB) - Ensemble model, %63.85 accuracy
+
+#### 3. Docker Image Build Edin
 ```bash
 # CPU versiyonu
 docker-compose build
@@ -97,7 +119,7 @@ docker-compose build
 docker-compose -f docker-compose.yml build
 ```
 
-#### 3. Uygulamayı Başlatın
+#### 4. Uygulamayı Başlatın
 ```bash
 # Web uygulamasını başlat
 docker-compose up
@@ -106,12 +128,12 @@ docker-compose up
 docker-compose up -d
 ```
 
-#### 4. Tarayıcıda Açın
+#### 5. Tarayıcıda Açın
 ```
 http://localhost:8501
 ```
 
-#### 5. Durdurma
+#### 6. Durdurma
 ```bash
 docker-compose down
 ```
@@ -129,7 +151,16 @@ git clone https://github.com/berkegazioglu/kedi-cins-tahmini.git
 cd kedi-cins-tahmini
 ```
 
-#### 2. Virtual Environment Oluşturun
+#### 2. Model Dosyalarını İndirin (Git LFS)
+```bash
+# Git LFS'i yükleyin (henüz yüklü değilse)
+git lfs install
+
+# Model dosyalarını çekin
+git lfs pull
+```
+
+#### 3. Virtual Environment Oluşturun
 ```bash
 # Windows
 python -m venv venv
@@ -140,7 +171,7 @@ python3 -m venv venv
 source venv/bin/activate
 ```
 
-#### 3. Gereksinimleri Yükleyin
+#### 4. Gereksinimleri Yükleyin
 ```bash
 # GPU versiyonu (NVIDIA CUDA gerekli)
 pip install -r requirements.txt
@@ -150,21 +181,10 @@ pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
 pip install -r requirements.txt
 ```
 
-#### 4. Model Dosyalarını İndirin
-```bash
-# Pre-trained modeller (opsiyonel)
-# Modeller otomatik olarak ilk çalıştırmada indirilecektir
-# Manuel indirmek için:
-python download_models.py
-```
-
 #### 5. Uygulamayı Başlatın
 ```bash
-# Streamlit web uygulaması
-streamlit run app_optimal_ensemble.py
-
-# Flask API (alternatif)
-python app_resnet50.py
+# Streamlit web uygulaması (ResNet50 - en iyi model)
+streamlit run app_resnet50.py
 ```
 
 ## 💻 Kullanım
