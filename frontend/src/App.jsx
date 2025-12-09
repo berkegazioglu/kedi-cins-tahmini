@@ -1,0 +1,437 @@
+import { useState, useEffect } from 'react'
+import './App.css'
+
+const API_BASE_URL = 'http://localhost:5001/api'
+
+const backgroundThemes = {
+  'purple-blue': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  'pink-orange': 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+  'blue-cyan': 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+  'green-turquoise': 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+  'red-orange': 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+  'dark-purple': 'linear-gradient(135deg, #2d1b4e 0%, #11998e 100%)',
+  'sunset': 'linear-gradient(135deg, #fa8bff 0%, #2bd2ff 0%, #2bff88 100%)',
+  'ocean': 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)'
+}
+
+const headerThemes = {
+  'red-pink': 'linear-gradient(135deg, #FF6B6B 0%, #FF5252 100%)',
+  'purple': 'linear-gradient(135deg, #9D50BB 0%, #6E48AA 100%)',
+  'blue': 'linear-gradient(135deg, #4A90E2 0%, #357ABD 100%)',
+  'green': 'linear-gradient(135deg, #56AB2F 0%, #A8E063 100%)',
+  'orange': 'linear-gradient(135deg, #F09819 0%, #EDDE5D 100%)',
+  'teal': 'linear-gradient(135deg, #00C9FF 0%, #92FE9D 100%)',
+  'pink': 'linear-gradient(135deg, #F093FB 0%, #F5576C 100%)',
+  'indigo': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+}
+
+function App() {
+  const [selectedFile, setSelectedFile] = useState(null)
+  const [preview, setPreview] = useState(null)
+  const [predictions, setPredictions] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const [catDetection, setCatDetection] = useState(null)
+  const [skipDetection, setSkipDetection] = useState(false)
+  const [breedInfo, setBreedInfo] = useState(null)
+  const [loadingInfo, setLoadingInfo] = useState(false)
+  const [catAnalysis, setCatAnalysis] = useState(null)
+  const [backgroundColor, setBackgroundColor] = useState('purple-blue')
+  const [headerColor, setHeaderColor] = useState('red-pink')
+  const [isDarkMode, setIsDarkMode] = useState(true)
+  const [isDragging, setIsDragging] = useState(false)
+
+  const processFile = (file) => {
+    if (file && file.type.startsWith('image/')) {
+      setSelectedFile(file)
+      setPredictions(null)
+      setError(null)
+      setCatDetection(null)
+      
+      // Create preview
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setPreview(reader.result)
+      }
+      reader.readAsDataURL(file)
+    } else {
+      setError('Lütfen geçerli bir görsel dosyası seçin')
+    }
+  }
+
+  const handleFileSelect = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      processFile(file)
+    }
+  }
+
+  const handleDragOver = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(true)
+  }
+
+  const handleDragLeave = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(false)
+  }
+
+  const handleDrop = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(false)
+
+    const files = e.dataTransfer.files
+    if (files && files.length > 0) {
+      processFile(files[0])
+    }
+  }
+
+  const handlePredict = async () => {
+    if (!selectedFile) {
+      setError('Lütfen bir fotoğraf seçin')
+      return
+    }
+
+    setLoading(true)
+    setError(null)
+    setPredictions(null)
+    setCatDetection(null)
+
+    try {
+      const formData = new FormData()
+      formData.append('image', selectedFile)
+      formData.append('skip_detection', skipDetection.toString())
+
+      const response = await fetch(`${API_BASE_URL}/predict`, {
+        method: 'POST',
+        body: formData
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Tahmin yapılamadı')
+      }
+
+      setPredictions(data.predictions)
+      setCatDetection(data.cat_detection)
+      
+      // Set cat analysis if available
+      if (data.cat_analysis) {
+        setCatAnalysis(data.cat_analysis)
+      }
+      
+      // Get breed info from Gemini AI for top prediction
+      if (data.predictions && data.predictions.length > 0) {
+        fetchBreedInfo(data.predictions[0].breed)
+      }
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const fetchBreedInfo = async (breedName) => {
+    setLoadingInfo(true)
+    setBreedInfo(null)
+    
+    try {
+      const response = await fetch(`${API_BASE_URL}/breed-info`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ breed: breedName }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        setBreedInfo(data.info)
+      } else {
+        // API key yoksa veya hata varsa sessizce geç
+        console.warn('Gemini AI bilgi alınamadı:', data.error)
+        // Kullanıcıya göstermek için bir mesaj eklenebilir ama şimdilik sessiz
+      }
+    } catch (err) {
+      console.warn('Breed info fetch error:', err)
+    } finally {
+      setLoadingInfo(false)
+    }
+  }
+
+  const handleReset = () => {
+    setSelectedFile(null)
+    setPreview(null)
+    setPredictions(null)
+    setError(null)
+    setCatDetection(null)
+    setBreedInfo(null)
+    setCatAnalysis(null)
+  }
+
+  const handleBackgroundChange = (theme) => {
+    setBackgroundColor(theme)
+    document.body.style.background = backgroundThemes[theme]
+  }
+
+  const handleHeaderChange = (theme) => {
+    setHeaderColor(theme)
+  }
+
+  const handleThemeToggle = () => {
+    setIsDarkMode(!isDarkMode)
+    document.documentElement.setAttribute('data-theme', !isDarkMode ? 'dark' : 'light')
+  }
+
+  const parseMarkdown = (text) => {
+    // **text** formatını <strong>text</strong> olarak değiştir
+    return text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+  }
+
+  const renderTextWithMarkdown = (text) => {
+    const parsed = parseMarkdown(text)
+    return <span dangerouslySetInnerHTML={{ __html: parsed }} />
+  }
+
+  // Set initial background on mount
+  useEffect(() => {
+    document.body.style.background = backgroundThemes[backgroundColor]
+    document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light')
+  }, [backgroundColor, isDarkMode])
+
+  return (
+    <div className="app">
+      <div className="container">
+        <header className="header" style={{ background: headerThemes[headerColor] }}>
+          <div className="header-content">
+            <div className="header-left">
+              <div>
+                <h1>🐱 Kedi Cinsi Tahmin Sistemi</h1>
+                <p>Fotoğraf yükleyin ve "Tahmin Et" butonuna tıklayın</p>
+              </div>
+            </div>
+            <div className="theme-selectors">
+              <div className="theme-row">
+                <div className="theme-selector">
+                  <span className="theme-label">🎨 Arka Plan:</span>
+                  <div className="theme-buttons">
+                    {Object.keys(backgroundThemes).map((theme) => (
+                      <button
+                        key={theme}
+                        className={`theme-btn ${backgroundColor === theme ? 'active' : ''}`}
+                        onClick={() => handleBackgroundChange(theme)}
+                        title={theme.replace('-', ' ')}
+                        style={{
+                          background: backgroundThemes[theme]
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
+                <div className="theme-selector theme-toggle-container" style={{ padding: '4px 4px' }}>
+                  <button 
+                    className="theme-toggle-btn"
+                    onClick={handleThemeToggle}
+                    title={isDarkMode ? 'Açık Tema' : 'Koyu Tema'}
+                  >
+                    {isDarkMode ? '🌙' : '☀️'}
+                  </button>
+                </div>
+              </div>
+              <div className="theme-selector">
+                <span className="theme-label">🎨 Header:</span>
+                <div className="theme-buttons">
+                  {Object.keys(headerThemes).map((theme) => (
+                    <button
+                      key={theme}
+                      className={`theme-btn ${headerColor === theme ? 'active' : ''}`}
+                      onClick={() => handleHeaderChange(theme)}
+                      title={theme.replace('-', ' ')}
+                      style={{
+                        background: headerThemes[theme]
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <div className="main-content">
+          <div className="upload-section">
+            <div 
+              className={`upload-box ${isDragging ? 'drag-over' : ''}`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+            >
+              {preview ? (
+                <div className="image-preview">
+                  <img src={preview} alt="Preview" />
+                  <button className="btn-remove" onClick={handleReset}>
+                    <span>×</span>
+                    <span>Kaldır</span>
+                  </button>
+                </div>
+              ) : (
+                <label className="upload-label">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileSelect}
+                    className="file-input"
+                  />
+                  <div className="upload-placeholder">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="17 8 12 3 7 8" />
+                      <line x1="12" y1="3" x2="12" y2="15" />
+                    </svg>
+                    <p>Fotoğraf Yükle</p>
+                    <span>JPG, JPEG veya PNG</span>
+                    <span style={{ marginTop: '10px', fontSize: '0.85rem', opacity: 0.7 }}>
+                      veya buraya sürükleyip bırakın
+                    </span>
+                  </div>
+                </label>
+              )}
+            </div>
+
+            <div className="controls">
+              <button
+                className="btn-predict"
+                onClick={handlePredict}
+                disabled={!selectedFile || loading}
+                style={{
+                  background: headerThemes[headerColor]
+                }}
+              >
+                {loading ? '⏳ Tahmin Yapılıyor...' : '🎯 Tahmin Et'}
+              </button>
+            </div>
+          </div>
+
+          <div className="results-section">
+            {error && (
+              <div className="error-box">
+                <span className="error-icon">⚠️</span>
+                <p>{error}</p>
+              </div>
+            )}
+
+            {catDetection && (
+              <div className={`detection-box ${catDetection.detected ? 'success' : 'warning'}`}>
+                <span>{catDetection.detected ? '✅' : '❌'}</span>
+                <div>
+                  <p><strong>Kedi Tespiti:</strong> {catDetection.message}</p>
+                  {catDetection.detected && (
+                    <p>Güven: %{catDetection.confidence}</p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {predictions && (
+              <div className="predictions-box">
+                <h2>🎯 Tahmin Sonuçları</h2>
+                
+                <div className="top-prediction">
+                  <div className="prediction-header">
+                    <h3>{predictions[0].breed}</h3>
+                    <span className="confidence-badge">
+                      %{predictions[0].confidence}
+                    </span>
+                  </div>
+                  <div className="confidence-bar">
+                    <div
+                      className="confidence-fill"
+                      style={{ width: `${predictions[0].confidence}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div className="other-predictions">
+                  <h4>Diğer Olası Cinler:</h4>
+                  {predictions.slice(1, 3).map((pred, index) => (
+                    <div key={index} className="prediction-item">
+                      <span className="prediction-breed">{pred.breed}</span>
+                      <span className="prediction-confidence">%{pred.confidence}</span>
+                      <div className="prediction-bar">
+                        <div
+                          className="prediction-fill"
+                          style={{ width: `${pred.confidence}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+              </div>
+            )}
+
+            {!predictions && !error && !loading && (
+              <div className="placeholder-box">
+                <p>👆 Bir fotoğraf yükleyin ve "Tahmin Et" butonuna tıklayın</p>
+              </div>
+            )}
+          </div>
+
+          {/* AI Analysis Sections - Full width outside grid */}
+          {predictions && (
+            <div className="ai-sections-full-width">
+              {/* Cat Image Analysis (Gemini Vision) */}
+              <div className="cat-analysis-container">
+                {catAnalysis && (
+                  <div className="cat-analysis-box">
+                    <h3>🔍 Fotoğraf Analizi (Gemini Vision AI)</h3>
+                    <div className="breed-info-content">
+                      {catAnalysis.split('\n').map((paragraph, index) => (
+                        paragraph.trim() && (
+                          <p key={index}>{renderTextWithMarkdown(paragraph.trim())}</p>
+                        )
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Gemini AI Breed Info */}
+              <div className="breed-info-container">
+                {loadingInfo && (
+                  <div className="breed-info-loading">
+                    <p>📚 {predictions[0].breed} hakkında bilgi yükleniyor...</p>
+                  </div>
+                )}
+                
+                {breedInfo && !loadingInfo && (
+                  <div className="breed-info-box">
+                    <h3>📖 {predictions[0].breed} Hakkında (Gemini AI)</h3>
+                    <div className="breed-info-content">
+                      {breedInfo.split('\n').map((paragraph, index) => (
+                        paragraph.trim() && (
+                          <p key={index}>{renderTextWithMarkdown(paragraph.trim())}</p>
+                        )
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <footer className="footer">
+          <p>🚀 Bu proje Tekirdağ Namık Kemal Üniveristesi öğrencileri tarafından yapılmıştır.</p>
+        </footer>
+      </div>
+    </div>
+  )
+}
+
+export default App
