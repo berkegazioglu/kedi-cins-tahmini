@@ -384,7 +384,7 @@ tensorboard --logdir runs/optimal_ensemble
 
 | Metric | Value |
 |--------|-------|
-| Model | YOLO11n (Nano) |
+| Model | YOLO (Nano) |
 | Parameters | 2.6M |
 | Cat Detection Accuracy | ~95% (COCO pre-trained) |
 | Confidence Threshold | 0.25 |
