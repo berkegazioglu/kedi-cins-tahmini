@@ -1,10 +1,10 @@
-# Python dependencies
-torch==2.5.1
-torchvision==0.20.1
-ultralytics==8.3.0
-streamlit==1.39.0
-Pillow==10.4.0
-numpy==1.24.3
+# Python dependencies (Python 3.13 compatible)
+torch>=2.5.0
+torchvision>=0.20.0
+ultralytics>=8.3.0
+streamlit>=1.39.0
+Pillow>=10.4.0
+numpy>=1.24.0
 opencv-python-headless==4.9.0.80
 pyyaml==6.0.1
 tqdm==4.66.1
