@@ -31,6 +31,7 @@ COPY predict_resnet50.py .
 COPY ensemble_model.py .
 COPY transformer_models.py .
 COPY augmentation_utils.py .
+COPY cat_breed_info.py .
 COPY show_classes.py .
 COPY yolo11n.pt .
 

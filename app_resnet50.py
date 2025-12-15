@@ -18,6 +18,12 @@ try:
 except:
     YOLO_AVAILABLE = False
 
+try:
+    from cat_breed_info import get_breed_info
+    BREED_INFO_AVAILABLE = True
+except:
+    BREED_INFO_AVAILABLE = False
+
 # Sayfa yapılandırması
 st.set_page_config(
     page_title="🐱 Kedi Cinsi Tahmin Sistemi - ResNet-50",
@@ -511,6 +517,63 @@ def main():
                     st.info("ℹ️ Orta düzey güvenle tahmin edildi.")
                 else:
                     st.warning("⚠️ Düşük güven - Daha net fotoğraf deneyin.")
+            
+            # Irk bilgisi kartları (sadece ev kedileri için ve yüksek güven varsa)
+            if not is_wild_cat and BREED_INFO_AVAILABLE and results[0]['confidence'] > 40:
+                st.markdown("---")
+                st.markdown("### 📚 Irk Hakkında Detaylı Bilgi")
+                
+                breed_name = results[0]['breed']
+                breed_info = get_breed_info(breed_name)
+                
+                if breed_info:
+                    # Tabs ile kategorize bilgi
+                    tab1, tab2, tab3, tab4 = st.tabs(["🏥 Sağlık", "🍽️ Beslenme", "💇 Bakım", "🎭 Karakter"])
+                    
+                    with tab1:
+                        st.markdown(f"**⏳ Ortalama Yaşam Süresi:** {breed_info['yaşam_süresi']}")
+                        st.markdown("**⚠️ Kalıtımsal Sağlık Riskleri:**")
+                        for risk in breed_info['sağlık_riskleri']:
+                            if "⚠️" in risk or "ETİK" in risk:
+                                st.error(f"• {risk}")
+                            else:
+                                st.warning(f"• {risk}")
+                    
+                    with tab2:
+                        beslenme = breed_info['beslenme']
+                        col_bes1, col_bes2 = st.columns(2)
+                        with col_bes1:
+                            st.metric("📊 Günlük Kalori", beslenme['günlük_kalori'])
+                        with col_bes2:
+                            st.metric("🥩 Protein İhtiyacı", beslenme['protein'])
+                        st.info(f"💡 **Özel İhtiyaçlar:** {beslenme['özel_ihtiyaçlar']}")
+                    
+                    with tab3:
+                        bakım = breed_info['bakım']
+                        st.markdown(f"**🧹 Tüy Bakımı:** {bakım['tüy_bakımı']}")
+                        st.markdown(f"**👥 Sosyalleşme:** {bakım['sosyalleşme']}")
+                        
+                        # Özel bakım notları
+                        for key, value in bakım.items():
+                            if key not in ['tüy_bakımı', 'sosyalleşme']:
+                                if "⚠️" in value:
+                                    st.error(f"**{key.replace('_', ' ').title()}:** {value}")
+                                else:
+                                    st.info(f"**{key.replace('_', ' ').title()}:** {value}")
+                    
+                    with tab4:
+                        davranış = breed_info['davranış']
+                        col_dav1, col_dav2, col_dav3 = st.columns(3)
+                        with col_dav1:
+                            st.metric("⚡ Enerji", davranış['enerji'])
+                            st.metric("🧠 Zeka", davranış['zeka'])
+                        with col_dav2:
+                            st.metric("🔊 Seslilik", davranış['ses'])
+                            st.metric("👶 Çocuk Uyumu", davranış['çocuk_uyumu'])
+                        with col_dav3:
+                            st.metric("🐕 Diğer Hayvanlar", davranış['diğer_hayvanlar'])
+                else:
+                    st.info(f"ℹ️ **{breed_name}** ırkı için henüz detaylı bilgi eklenmemiş. Kısa sürede eklenecektir!")
         else:
             st.info("👆 Bir fotoğraf yükleyin ve 'Tahmin Et' butonuna tıklayın.")
     
