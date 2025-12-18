@@ -18,6 +18,12 @@ try:
 except:
     YOLO_AVAILABLE = False
 
+try:
+    from cat_breed_info import get_breed_info
+    BREED_INFO_AVAILABLE = True
+except:
+    BREED_INFO_AVAILABLE = False
+
 # Sayfa yapılandırması
 st.set_page_config(
     page_title="🐱 Kedi Cinsi Tahmin Sistemi - ResNet-50",
@@ -218,7 +224,7 @@ def preprocess_image(image):
     return image_tensor
 
 def predict_breed(model, image, class_names, device, top_k=5):
-    """Predict cat breed with top-k results"""
+    """Predict cat breed with top-k results and uncertainty metric"""
     try:
         # Preprocess
         image_tensor = preprocess_image(image)
@@ -230,6 +236,12 @@ def predict_breed(model, image, class_names, device, top_k=5):
             probabilities = torch.nn.functional.softmax(outputs, dim=1)
             top_probs, top_indices = torch.topk(probabilities, top_k)
         
+        # Calculate prediction entropy (uncertainty)
+        # High entropy = predictions are spread out (wild cat, uncertain)
+        # Low entropy = one prediction dominates (domestic cat, confident)
+        top_probs_np = top_probs[0].cpu().numpy()
+        entropy = -np.sum(top_probs_np * np.log(top_probs_np + 1e-10))
+        
         # Format results
         results = []
         for prob, idx in zip(top_probs[0], top_indices[0]):
@@ -238,10 +250,11 @@ def predict_breed(model, image, class_names, device, top_k=5):
                 'confidence': prob.item() * 100
             })
         
-        return results
+        # Return results and entropy for uncertainty detection
+        return results, entropy
     except Exception as e:
         st.error(f"Tahmin yapılırken hata oluştu: {e}")
-        return None
+        return None, None
 
 def main():
     # Header
@@ -315,6 +328,21 @@ def main():
             skip_detection = st.checkbox("🔧 Kedi Tespitini Atla (Debug)", 
                                         help="Kedi tespitini devre dışı bırakır, doğrudan cins tahminine geçer")
             
+            # Uncertainty detection settings
+            st.markdown("---")
+            st.markdown("### 🎚️ Vahşi Kedi Tespiti")
+            st.info("📊 **Belirsizlik Analizi**: Tahminlerin dağılımına bakarak vahşi kedi (vaşak, kaplan, aslan vb.) tespit eder.")
+            
+            uncertainty_threshold = st.slider(
+                "Belirsizlik Eşiği", 
+                min_value=0.5, 
+                max_value=2.0, 
+                value=1.2,
+                step=0.1,
+                help="Entropi değeri bu eşiğin üzerindeyse 'vahşi kedi/veri seti dışı' uyarısı verir. Düşük değer = daha hassas tespit."
+            )
+            st.caption("💡 Ev kedileri için entropi düşük (~0.5-1.0), vahşi kediler için yüksek (~1.2-2.0)")
+            
             st.markdown("---")
             st.markdown("### ℹ️ Nasıl Kullanılır?")
             st.markdown("""
@@ -381,12 +409,18 @@ def main():
                         if cat_confidence < 0.5 and yolo_model is not None and not skip_detection:
                             st.warning(f"⚠️ Düşük güvenle kedi tespit edildi (%{cat_confidence*100:.1f}). Sonuçlar yanıltıcı olabilir.")
                         
-                        results = predict_breed(model, image, class_names, device, top_k=5)
+                        results, entropy = predict_breed(model, image, class_names, device, top_k=5)
                         
                         if results:
+                            # Check uncertainty (entropy)
+                            is_wild_cat = entropy > uncertainty_threshold
+                            
                             st.session_state['results'] = results
                             st.session_state['cat_confidence'] = cat_confidence
                             st.session_state['detection_msg'] = detection_msg
+                            st.session_state['entropy'] = entropy
+                            st.session_state['uncertainty_threshold'] = uncertainty_threshold
+                            st.session_state['is_wild_cat'] = is_wild_cat
     
     with col2:
         st.markdown("### 🎯 Tahmin Sonuçları")
@@ -394,21 +428,68 @@ def main():
         if 'results' in st.session_state:
             results = st.session_state['results']
             cat_conf = st.session_state.get('cat_confidence', 1.0)
+            is_wild_cat = st.session_state.get('is_wild_cat', False)
+            entropy = st.session_state.get('entropy', 0.0)
+            threshold = st.session_state.get('uncertainty_threshold', 1.2)
             
-            # Show cat detection confidence if available
-            if cat_conf < 1.0:
-                st.info(f"🔍 Kedi Tespit Güveni: %{cat_conf*100:.1f}")
+            # Check if this is a wild cat (high uncertainty/entropy)
+            if is_wild_cat:
+                st.error("🦁 VAHŞİ KEDİ TESPİT EDİLDİ")
+                st.warning(f"""
+                ⚠️ **Bu muhtemelen bir ev kedisi DEĞİL!**
+                
+                📊 **Belirsizlik Skoru**: {entropy:.3f} (Eşik: {threshold:.1f})
+                
+                **Tespit nedeni:**
+                Tahmin dağılımı çok dağınık → Model hiçbir ev kedisi ırkına kesin eşleşme bulamadı.
+                
+                **Muhtemel hayvan türleri:**
+                - 🐆 Vaşak (Lynx)
+                - 🐯 Kaplan (Tiger)
+                - 🦁 Aslan (Lion) 
+                - 🐆 Leopar, Puma, Çita
+                - 🐱 Hibrit veya çok nadir ev kedisi ırkı
+                
+                **Not:** 
+                Bu sistem yalnızca **59 ev kedisi ırkı** için eğitilmiştir.
+                Vahşi kedigiller (Felidae) bu veri setinde yoktur.
+                """)
+                st.markdown("---")
+                st.info("📋 **Referans amaçlı** en yakın ev kedisi ırkları:")
+            
+            # Show detection metrics
+            col_det1, col_det2 = st.columns(2)
+            with col_det1:
+                if cat_conf < 1.0:
+                    st.metric("🔍 Kedi Tespiti", f"%{cat_conf*100:.1f}")
+            with col_det2:
+                entropy_color = "🔴" if is_wild_cat else "🟢"
+                st.metric(f"{entropy_color} Belirsizlik", f"{entropy:.3f}")
             
             # Top prediction
             top_result = results[0]
-            st.markdown(f"""
-                <div class='prediction-box' style='border-left: 5px solid #FF6B6B;'>
-                    <h2 style='color: #FF6B6B; margin: 0;'>{top_result['breed']}</h2>
-                    <p style='font-size: 24px; color: #4CAF50; margin: 10px 0;'>
-                        %{top_result['confidence']:.2f} güven
-                    </p>
-                </div>
-            """, unsafe_allow_html=True)
+            
+            # Use different styling based on wild cat detection
+            if is_wild_cat:
+                # Subdued styling for wild cat predictions
+                st.markdown(f"""
+                    <div class='prediction-box' style='border-left: 5px solid #FFA726; opacity: 0.7;'>
+                        <h3 style='color: #FFA726; margin: 0;'>En Yakın Ev Kedisi: {top_result['breed']}</h3>
+                        <p style='font-size: 18px; color: #999; margin: 10px 0;'>
+                            %{top_result['confidence']:.2f} (referans)
+                        </p>
+                    </div>
+                """, unsafe_allow_html=True)
+            else:
+                # Normal confident styling for domestic cats
+                st.markdown(f"""
+                    <div class='prediction-box' style='border-left: 5px solid #FF6B6B;'>
+                        <h2 style='color: #FF6B6B; margin: 0;'>{top_result['breed']}</h2>
+                        <p style='font-size: 24px; color: #4CAF50; margin: 10px 0;'>
+                            %{top_result['confidence']:.2f} güven
+                        </p>
+                    </div>
+                """, unsafe_allow_html=True)
             
             st.markdown("#### 📊 Diğer Olası Cinler")
             
@@ -427,14 +508,72 @@ def main():
                 st.progress(confidence / 100.0)
                 st.markdown("<br>", unsafe_allow_html=True)
             
-            # Confidence interpretation
-            top_confidence = results[0]['confidence']
-            if top_confidence > 80:
-                st.success("✅ Yüksek güvenle tahmin edildi!")
-            elif top_confidence > 60:
-                st.info("ℹ️ Orta düzey güvenle tahmin edildi.")
-            else:
-                st.warning("⚠️ Düşük güven - Bu cins için daha fazla eğitim gerekebilir.")
+            # Confidence interpretation (only if not wild cat)
+            if not is_wild_cat:
+                top_confidence = results[0]['confidence']
+                if top_confidence > 70:
+                    st.success("✅ Yüksek güvenle ev kedisi cinsi tahmin edildi!")
+                elif top_confidence > 50:
+                    st.info("ℹ️ Orta düzey güvenle tahmin edildi.")
+                else:
+                    st.warning("⚠️ Düşük güven - Daha net fotoğraf deneyin.")
+            
+            # Irk bilgisi kartları (sadece ev kedileri için ve yüksek güven varsa)
+            if not is_wild_cat and BREED_INFO_AVAILABLE and results[0]['confidence'] > 40:
+                st.markdown("---")
+                st.markdown("### 📚 Irk Hakkında Detaylı Bilgi")
+                
+                breed_name = results[0]['breed']
+                breed_info = get_breed_info(breed_name)
+                
+                if breed_info:
+                    # Tabs ile kategorize bilgi
+                    tab1, tab2, tab3, tab4 = st.tabs(["🏥 Sağlık", "🍽️ Beslenme", "💇 Bakım", "🎭 Karakter"])
+                    
+                    with tab1:
+                        st.markdown(f"**⏳ Ortalama Yaşam Süresi:** {breed_info['yaşam_süresi']}")
+                        st.markdown("**⚠️ Kalıtımsal Sağlık Riskleri:**")
+                        for risk in breed_info['sağlık_riskleri']:
+                            if "⚠️" in risk or "ETİK" in risk:
+                                st.error(f"• {risk}")
+                            else:
+                                st.warning(f"• {risk}")
+                    
+                    with tab2:
+                        beslenme = breed_info['beslenme']
+                        col_bes1, col_bes2 = st.columns(2)
+                        with col_bes1:
+                            st.metric("📊 Günlük Kalori", beslenme['günlük_kalori'])
+                        with col_bes2:
+                            st.metric("🥩 Protein İhtiyacı", beslenme['protein'])
+                        st.info(f"💡 **Özel İhtiyaçlar:** {beslenme['özel_ihtiyaçlar']}")
+                    
+                    with tab3:
+                        bakım = breed_info['bakım']
+                        st.markdown(f"**🧹 Tüy Bakımı:** {bakım['tüy_bakımı']}")
+                        st.markdown(f"**👥 Sosyalleşme:** {bakım['sosyalleşme']}")
+                        
+                        # Özel bakım notları
+                        for key, value in bakım.items():
+                            if key not in ['tüy_bakımı', 'sosyalleşme']:
+                                if "⚠️" in value:
+                                    st.error(f"**{key.replace('_', ' ').title()}:** {value}")
+                                else:
+                                    st.info(f"**{key.replace('_', ' ').title()}:** {value}")
+                    
+                    with tab4:
+                        davranış = breed_info['davranış']
+                        col_dav1, col_dav2, col_dav3 = st.columns(3)
+                        with col_dav1:
+                            st.metric("⚡ Enerji", davranış['enerji'])
+                            st.metric("🧠 Zeka", davranış['zeka'])
+                        with col_dav2:
+                            st.metric("🔊 Seslilik", davranış['ses'])
+                            st.metric("👶 Çocuk Uyumu", davranış['çocuk_uyumu'])
+                        with col_dav3:
+                            st.metric("🐕 Diğer Hayvanlar", davranış['diğer_hayvanlar'])
+                else:
+                    st.info(f"ℹ️ **{breed_name}** ırkı için henüz detaylı bilgi eklenmemiş. Kısa sürede eklenecektir!")
         else:
             st.info("👆 Bir fotoğraf yükleyin ve 'Tahmin Et' butonuna tıklayın.")
     

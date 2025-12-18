@@ -27,12 +27,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application files
 COPY app_resnet50.py .
-COPY app_ensemble.py .
 COPY predict_resnet50.py .
-COPY predict_ensemble.py .
 COPY ensemble_model.py .
 COPY transformer_models.py .
 COPY augmentation_utils.py .
+COPY cat_breed_info.py .
 COPY show_classes.py .
 COPY yolo11n.pt .
 
@@ -41,13 +40,11 @@ COPY .streamlit .streamlit
 
 # Create necessary directories
 RUN mkdir -p runs/resnet50_v2/weights
-RUN mkdir -p runs/ensemble/weights
-RUN mkdir -p runs/super_ensemble/weights
+RUN mkdir -p runs/optimal_ensemble
 
 # Copy the trained models (will be added by user)
 # COPY runs/resnet50_v2/weights/best.pth runs/resnet50_v2/weights/
-# COPY runs/ensemble/weights/*.pth runs/ensemble/weights/
-# COPY runs/super_ensemble/weights/*.pth runs/super_ensemble/weights/
+# COPY runs/optimal_ensemble/optimal_ensemble_final.pth runs/optimal_ensemble/
 
 # Expose Streamlit port
 EXPOSE 8501
