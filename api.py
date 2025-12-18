@@ -3,7 +3,7 @@ Flask RESTful API for Cat Breed Prediction
 Backend API for React frontend
 """
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory, send_file
 from flask_cors import CORS
 from PIL import Image
 import torch
@@ -12,6 +12,11 @@ from torchvision import models, transforms
 import io
 import base64
 import os
+import sys
+import time
+import json
+from functools import lru_cache
+from collections import defaultdict
 
 try:
     from ultralytics import YOLO
@@ -25,7 +30,11 @@ try:
 except:
     GEMINI_AVAILABLE = False
 
-app = Flask(__name__)
+# Base directory for web application
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+FRONTEND_DIR = os.path.join(BASE_DIR, 'frontend', 'dist')
+
+app = Flask(__name__, static_folder=FRONTEND_DIR, static_url_path='')
 CORS(app)  # Enable CORS for React frontend
 
 # Model paths
@@ -37,6 +46,14 @@ model = None
 class_names = None
 device = None
 yolo_model = None
+
+# Cache for Gemini API responses (breed name -> (response, timestamp))
+gemini_cache = {}
+CACHE_DURATION = 3600 * 24  # 24 hours cache
+
+# Rate limiting for Gemini API (prevent too many requests)
+last_api_call_time = defaultdict(float)
+MIN_API_CALL_INTERVAL = 2.0  # Minimum 2 seconds between API calls
 
 
 def load_models():
@@ -57,7 +74,27 @@ def load_models():
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         print(f"📱 Using device: {device}")
         
-        checkpoint = torch.load(MODEL_PATH, map_location=device, weights_only=False)
+        # Check if model file exists
+        if not os.path.exists(MODEL_PATH):
+            print(f"❌ Model file not found: {MODEL_PATH}")
+            return False
+        
+        print(f"📂 Loading model from: {MODEL_PATH}")
+        print(f"   File size: {os.path.getsize(MODEL_PATH) / (1024*1024):.2f} MB")
+        
+        # Try loading with different methods for compatibility
+        try:
+            checkpoint = torch.load(MODEL_PATH, map_location=device, weights_only=False)
+        except Exception as e1:
+            print(f"⚠️ First load attempt failed: {e1}")
+            try:
+                # Try without weights_only for older PyTorch versions
+                checkpoint = torch.load(MODEL_PATH, map_location=device)
+            except Exception as e2:
+                print(f"⚠️ Second load attempt failed: {e2}")
+                # Try reading as binary first
+                with open(MODEL_PATH, 'rb') as f:
+                    checkpoint = torch.load(f, map_location=device)
         num_classes = len(checkpoint['class_names'])
         class_names = checkpoint['class_names']
         
@@ -219,22 +256,38 @@ def predict():
         image.save(buffer, format='JPEG')
         image_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
         
-        # Analyze cat image with Gemini Vision
+        # Analyze cat image with Gemini Vision (optional - skip if quota exceeded)
         cat_analysis = None
+        cat_analysis_error = None
         if GEMINI_AVAILABLE and results:
             try:
                 top_breed = results[0]['breed'] if results else None
                 print(f"🔍 Görsel analizi başlatılıyor (Cins: {top_breed})...")
                 cat_analysis = analyze_cat_image_with_gemini(image_base64, top_breed)
-                if cat_analysis:
+                
+                # Check if it's a quota error message or special marker
+                if cat_analysis == "QUOTA_ERROR":
+                    print("⚠️ Görsel analizi quota hatası (QUOTA_ERROR) - uyarı mesajı gönderiliyor")
+                    cat_analysis = None
+                    cat_analysis_error = "⚠️ API quota limiti aşıldı. Görsel analiz özelliği şu anda kullanılamıyor. Tahmin özelliği normal çalışmaya devam ediyor."
+                elif cat_analysis and isinstance(cat_analysis, str) and ("quota" in cat_analysis.lower() or "⚠️" in cat_analysis or "limit" in cat_analysis.lower() or "429" in str(cat_analysis)):
+                    print("⚠️ Görsel analizi quota hatası (string içinde) - uyarı mesajı gönderiliyor")
+                    cat_analysis = None
+                    cat_analysis_error = "⚠️ API quota limiti aşıldı. Görsel analiz özelliği şu anda kullanılamıyor. Tahmin özelliği normal çalışmaya devam ediyor."
+                elif cat_analysis:
                     print(f"✅ Görsel analizi tamamlandı ({len(cat_analysis)} karakter)")
                 else:
-                    print("⚠️ Görsel analizi sonuç döndürmedi")
+                    # cat_analysis None ise, bu quota hatası veya başka bir hata olabilir
+                    print("⚠️ Görsel analizi sonuç döndürmedi (None) - uyarı mesajı gönderiliyor")
+                    cat_analysis_error = "⚠️ Görsel analiz şu anda kullanılamıyor. Tahmin özelliği normal çalışmaya devam ediyor."
             except Exception as e:
-                print(f"❌ Görsel analizi hatası: {e}")
-                import traceback
-                traceback.print_exc()
+                print(f"⚠️ Görsel analizi hatası (opsiyonel): {e}")
                 cat_analysis = None
+                cat_analysis_error = "⚠️ Görsel analiz şu anda kullanılamıyor. Tahmin özelliği normal çalışmaya devam ediyor."
+        else:
+            # GEMINI_AVAILABLE değilse veya results yoksa
+            if results:
+                cat_analysis_error = "⚠️ Görsel analiz şu anda kullanılamıyor. Tahmin özelliği normal çalışmaya devam ediyor."
         
         response_data = {
             'success': True,
@@ -248,6 +301,9 @@ def predict():
         
         if cat_analysis:
             response_data['cat_analysis'] = cat_analysis
+        
+        if cat_analysis_error:
+            response_data['cat_analysis_error'] = cat_analysis_error
         
         return jsonify(response_data)
         
@@ -267,17 +323,107 @@ def get_classes():
     })
 
 
+# Load static breed info database
+BREED_INFO_DB = None
+BREED_INFO_DB_PATH = os.path.join(BASE_DIR, 'cat_breed_info.json')
+
+def load_breed_info_db():
+    """Load static breed information database"""
+    global BREED_INFO_DB
+    if BREED_INFO_DB is None:
+        try:
+            if os.path.exists(BREED_INFO_DB_PATH):
+                with open(BREED_INFO_DB_PATH, 'r', encoding='utf-8') as f:
+                    BREED_INFO_DB = json.load(f)
+                print(f"✅ Statik kedi cinsi bilgi veritabanı yüklendi ({len(BREED_INFO_DB)} cins)")
+            else:
+                print(f"⚠️ Kedi cinsi bilgi dosyası bulunamadı: {BREED_INFO_DB_PATH}")
+                BREED_INFO_DB = {}
+        except Exception as e:
+            print(f"❌ Kedi cinsi bilgi veritabanı yüklenirken hata: {e}")
+            BREED_INFO_DB = {}
+    return BREED_INFO_DB
+
+def get_breed_info_from_static_db(breed_name):
+    """Get cat breed information from static database (FREE, no API needed)"""
+    db = load_breed_info_db()
+    
+    # Try exact match first
+    if breed_name in db:
+        info = db[breed_name]
+        result = f"""**Karakter:** {info.get('karakter', 'Bilgi bulunamadı')}
+
+**Bakım:** {info.get('bakim', 'Bilgi bulunamadı')}
+
+**Sağlık:** {info.get('saglik', 'Bilgi bulunamadı')}
+
+**Mama:** {info.get('mama', 'Bilgi bulunamadı')}
+
+**Yaşam:** {info.get('yasam', 'Bilgi bulunamadı')}"""
+        print(f"✅ Statik veritabanından alındı: {breed_name}")
+        return result
+    
+    # Try case-insensitive match
+    breed_lower = breed_name.lower()
+    for key, value in db.items():
+        if key.lower() == breed_lower:
+            info = value
+            result = f"""**Karakter:** {info.get('karakter', 'Bilgi bulunamadı')}
+
+**Bakım:** {info.get('bakim', 'Bilgi bulunamadı')}
+
+**Sağlık:** {info.get('saglik', 'Bilgi bulunamadı')}
+
+**Mama:** {info.get('mama', 'Bilgi bulunamadı')}
+
+**Yaşam:** {info.get('yasam', 'Bilgi bulunamadı')}"""
+            print(f"✅ Statik veritabanından alındı (case-insensitive): {breed_name}")
+            return result
+    
+    print(f"⚠️ {breed_name} için statik veritabanında bilgi bulunamadı")
+    return None
+
 def get_breed_info_from_gemini(breed_name):
-    """Get cat breed information from Gemini AI using REST API"""
+    """Get cat breed information from Gemini AI using REST API with caching and rate limiting (FALLBACK - requires API key)"""
+    # First try static database (FREE)
+    static_info = get_breed_info_from_static_db(breed_name)
+    if static_info:
+        return static_info
+    
+    # If not found in static DB, try Gemini API (if available and configured)
     if not GEMINI_AVAILABLE:
         return None
     
+    # Normalize breed name for cache key
+    cache_key = breed_name.lower().strip()
+    
+    # Check cache first (24 hour cache)
+    current_time = time.time()
+    if cache_key in gemini_cache:
+        cached_response, cached_time = gemini_cache[cache_key]
+        if current_time - cached_time < CACHE_DURATION:
+            print(f"✅ Cache'den döndürüldü: {breed_name}")
+            return cached_response
+        else:
+            # Cache expired, remove it
+            del gemini_cache[cache_key]
+    
+    # Rate limiting: Check if we need to wait
+    time_since_last_call = current_time - last_api_call_time['breed_info']
+    if time_since_last_call < MIN_API_CALL_INTERVAL:
+        wait_time = MIN_API_CALL_INTERVAL - time_since_last_call
+        print(f"⏳ Rate limiting: {wait_time:.1f} saniye bekleniyor...")
+        time.sleep(wait_time)
+    
     try:
         # Get API key from environment variable or use default
-        api_key = os.getenv('GEMINI_API_KEY', 'AIzaSyC7fP0h3TI82wRzdmGvnBvA4ys2UuLUVvs')
+        api_key = os.getenv('GEMINI_API_KEY', 'AIzaSyD919v-LWT423ZpSX1MHPcjnlNsVuQW7PQ')
         if not api_key:
             print("⚠️ GEMINI_API_KEY environment variable not set")
             return None
+        
+        # Update last call time
+        last_api_call_time['breed_info'] = time.time()
         
         # Create prompt
         prompt = f"""Lütfen {breed_name} kedi cinsi hakkında kedi sahipleri için pratik ve kısa bilgiler ver. 
@@ -311,11 +457,10 @@ Toplam maksimum 200 kelime. Pratik ve kedi sahipleri için faydalı bilgiler ver
         response = requests.post(url, headers=headers, json=data, timeout=30)
         
         if response.status_code == 429:
-            print("⚠️ Gemini API quota aşıldı (429). Breed info atlanıyor.")
+            print("⚠️ Gemini API quota aşıldı (429). Statik veritabanı kullanılıyor.")
             return None
         elif response.status_code == 401 or response.status_code == 403:
-            error_msg = "API key geçersiz veya süresi dolmuş. Lütfen yeni bir API key oluşturun."
-            print(f"❌ Gemini API yetkilendirme hatası ({response.status_code}): {error_msg}")
+            print("⚠️ Gemini API yetkilendirme hatası. Statik veritabanı kullanılıyor.")
             return None
         
         response.raise_for_status()
@@ -327,17 +472,26 @@ Toplam maksimum 200 kelime. Pratik ve kedi sahipleri için faydalı bilgiler ver
             if 'content' in result['candidates'][0]:
                 if 'parts' in result['candidates'][0]['content']:
                     if len(result['candidates'][0]['content']['parts']) > 0:
-                        return result['candidates'][0]['content']['parts'][0].get('text', '')
+                        response_text = result['candidates'][0]['content']['parts'][0].get('text', '')
+                        # Cache the successful response
+                        if response_text:
+                            gemini_cache[cache_key] = (response_text, time.time())
+                            print(f"✅ Gemini API'den alındı ve cache'lendi: {breed_name}")
+                        return response_text
         
         return None
     except requests.exceptions.HTTPError as e:
         if e.response.status_code == 401 or e.response.status_code == 403:
-            print(f"❌ Gemini API yetkilendirme hatası ({e.response.status_code}): API key geçersiz veya süresi dolmuş.")
+            print("⚠️ Gemini API yetkilendirme hatası. Statik veritabanı kullanılıyor.")
+            return None
+        elif e.response.status_code == 429:
+            print("⚠️ Gemini API quota hatası. Statik veritabanı kullanılıyor.")
+            return None
         else:
-            print(f"❌ Gemini AI HTTP error: {e.response.status_code} - {e.response.text[:200]}")
-        return None
+            print(f"⚠️ Gemini AI HTTP error: {e.response.status_code}. Statik veritabanı kullanılıyor.")
+            return None
     except Exception as e:
-        print(f"❌ Gemini AI error: {e}")
+        print(f"⚠️ Gemini AI error: {e}. Statik veritabanı kullanılıyor.")
         return None
 
 
@@ -353,11 +507,22 @@ def get_breed_info():
         
         info = get_breed_info_from_gemini(breed_name)
         
+        # Statik veritabanı kullanılıyor, hata mesajı döndürmeye gerek yok
         if info is None:
             return jsonify({
-                'error': 'Gemini AI bilgi alınamadı. GEMINI_API_KEY kontrol edin.',
-                'breed': breed_name
-            }), 500
+                'error': f'{breed_name} cinsi için bilgi bulunamadı. Statik veritabanında henüz eklenmemiş olabilir.',
+                'breed': breed_name,
+                'success': False
+            }), 404
+        
+        # Check if info is an error message (quota, API key, etc.) - should not happen with static DB
+        if isinstance(info, str) and ('quota' in info.lower() or '⚠️' in info or 'error' in info.lower() or 'API key' in info or 'geçersiz' in info.lower() or 'limit' in info.lower()):
+            # If it's an error, return None (static DB will be used)
+            return jsonify({
+                'error': f'{breed_name} cinsi için bilgi bulunamadı.',
+                'breed': breed_name,
+                'success': False
+            }), 404
         
         return jsonify({
             'success': True,
@@ -370,14 +535,25 @@ def get_breed_info():
 
 
 def analyze_cat_image_with_gemini(image_base64, breed_name=None):
-    """Analyze cat image using Gemini AI vision model"""
+    """Analyze cat image using Gemini AI vision model with rate limiting"""
     if not GEMINI_AVAILABLE:
         return None
     
+    # Rate limiting: Check if we need to wait
+    current_time = time.time()
+    time_since_last_call = current_time - last_api_call_time['image_analysis']
+    if time_since_last_call < MIN_API_CALL_INTERVAL:
+        wait_time = MIN_API_CALL_INTERVAL - time_since_last_call
+        print(f"⏳ Rate limiting: {wait_time:.1f} saniye bekleniyor...")
+        time.sleep(wait_time)
+    
     try:
-        api_key = os.getenv('GEMINI_API_KEY', 'AIzaSyC7fP0h3TI82wRzdmGvnBvA4ys2UuLUVvs')
+        api_key = os.getenv('GEMINI_API_KEY', 'AIzaSyD919v-LWT423ZpSX1MHPcjnlNsVuQW7PQ')
         if not api_key:
             return None
+        
+        # Update last call time
+        last_api_call_time['image_analysis'] = time.time()
         
         # Create prompt for image analysis
         breed_context = f" Tahmin edilen cins: {breed_name}." if breed_name else ""
@@ -430,7 +606,7 @@ Her bölüm 1-2 cümle, toplam maksimum 150 kelime."""
         if response.status_code == 429:
             error_msg = response.json().get('error', {}).get('message', 'Quota aşıldı')
             print(f"⚠️ Gemini API quota aşıldı (429): {error_msg}")
-            return "⚠️ Görsel analiz şu anda kullanılamıyor (API quota aşıldı). Lütfen daha sonra tekrar deneyin."
+            return "QUOTA_ERROR"  # Return special marker so parent function can set error message
         
         response.raise_for_status()
         
@@ -447,7 +623,7 @@ Her bölüm 1-2 cümle, toplam maksimum 150 kelime."""
     except requests.exceptions.HTTPError as e:
         if e.response.status_code == 429:
             print("⚠️ Gemini API quota aşıldı (429). Görsel analizi atlanıyor.")
-            return None
+            return "QUOTA_ERROR"  # Special marker for quota error
         elif e.response.status_code == 401 or e.response.status_code == 403:
             error_msg = "API key geçersiz veya süresi dolmuş. Lütfen yeni bir API key oluşturun."
             print(f"❌ Gemini API yetkilendirme hatası ({e.response.status_code}): {error_msg}")
@@ -504,24 +680,63 @@ def analyze_cat():
         return jsonify({'error': f'Hata: {str(e)}'}), 500
 
 
-if __name__ == '__main__':
-    print("🚀 Starting Flask API server...")
-    print("📦 Loading models...")
-    
-    if load_models():
-        print("✅ All models loaded successfully!")
-        print("🌐 Starting server on http://localhost:5001")
-        print("📡 API endpoints:")
-        print("   - GET  /api/health")
-        print("   - POST /api/predict")
-        print("   - GET  /api/classes")
-        print("   - POST /api/breed-info (Gemini AI - Kedi cinsi bilgisi)")
-        print("   - POST /api/analyze-cat (Gemini Vision - Fotoğraf analizi)")
-        if GEMINI_AVAILABLE:
-            print("   ✅ Gemini AI hazır (GEMINI_API_KEY gerekli)")
-        else:
-            print("   ⚠️  Gemini AI yüklü değil")
-        app.run(host='0.0.0.0', port=5001, debug=True)
+# Serve frontend static files
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve_frontend(path):
+    """Serve React frontend"""
+    if path != "" and os.path.exists(os.path.join(FRONTEND_DIR, path)):
+        return send_from_directory(FRONTEND_DIR, path)
     else:
-        print("❌ Failed to load models. Exiting...")
+        # Serve index.html for React Router
+        index_path = os.path.join(FRONTEND_DIR, 'index.html')
+        if os.path.exists(index_path):
+            return send_file(index_path)
+        else:
+            return jsonify({'error': 'Frontend build not found. Please build frontend first.'}), 404
+
+
+if __name__ == '__main__':
+    import traceback
+    try:
+        print("🚀 Starting Flask API server...")
+        print(f"📁 BASE_DIR: {BASE_DIR}")
+        print(f"📁 MODEL_PATH: {MODEL_PATH}")
+        print(f"📁 YOLO_MODEL_PATH: {YOLO_MODEL_PATH}")
+        print(f"📁 FRONTEND_DIR: {FRONTEND_DIR}")
+        
+        # Check if files exist
+        print(f"📂 Checking files...")
+        print(f"   MODEL_PATH exists: {os.path.exists(MODEL_PATH)}")
+        print(f"   YOLO_MODEL_PATH exists: {os.path.exists(YOLO_MODEL_PATH)}")
+        print(f"   FRONTEND_DIR exists: {os.path.exists(FRONTEND_DIR)}")
+        
+        if not os.path.exists(MODEL_PATH):
+            print(f"❌ Model file not found: {MODEL_PATH}")
+            print(f"   Current working directory: {os.getcwd()}")
+        
+        print("📦 Loading models...")
+        
+        if load_models():
+            print("✅ All models loaded successfully!")
+            print("🌐 Starting server on http://localhost:5001")
+            print("📡 API endpoints:")
+            print("   - GET  /api/health")
+            print("   - POST /api/predict")
+            print("   - GET  /api/classes")
+            print("   - POST /api/breed-info (Gemini AI - Kedi cinsi bilgisi)")
+            print("   - POST /api/analyze-cat (Gemini Vision - Fotoğraf analizi)")
+            if GEMINI_AVAILABLE:
+                print("   ✅ Gemini AI hazır (GEMINI_API_KEY gerekli)")
+            else:
+                print("   ⚠️  Gemini AI yüklü değil")
+            
+            app.run(host='0.0.0.0', port=5001, debug=False)
+        else:
+            print("❌ Failed to load models. Exiting...")
+            sys.exit(1)
+    except Exception as e:
+        print(f"❌ Error: {e}")
+        traceback.print_exc()
+        sys.exit(1)
 

@@ -36,6 +36,7 @@ function App() {
   const [breedInfo, setBreedInfo] = useState(null)
   const [loadingInfo, setLoadingInfo] = useState(false)
   const [catAnalysis, setCatAnalysis] = useState(null)
+  const [catAnalysisError, setCatAnalysisError] = useState(null)
   const [backgroundColor, setBackgroundColor] = useState('purple-blue')
   const [headerColor, setHeaderColor] = useState('red-pink')
   const [isDarkMode, setIsDarkMode] = useState(true)
@@ -122,11 +123,21 @@ function App() {
       // Set cat analysis if available
       if (data.cat_analysis) {
         setCatAnalysis(data.cat_analysis)
+        setCatAnalysisError(null)
+      } else if (data.cat_analysis_error) {
+        setCatAnalysis(null)
+        setCatAnalysisError(data.cat_analysis_error)
+      } else {
+        setCatAnalysis(null)
+        setCatAnalysisError(null)
       }
       
-      // Get breed info from Gemini AI for top prediction
+      // Get breed info from Gemini AI for top prediction (optional feature)
       if (data.predictions && data.predictions.length > 0) {
-        fetchBreedInfo(data.predictions[0].breed)
+        // Try to fetch breed info, but don't block if it fails
+        fetchBreedInfo(data.predictions[0].breed).catch(err => {
+          console.warn('Breed info fetch failed (optional feature):', err)
+        })
       }
     } catch (err) {
       setError(err.message)
@@ -153,12 +164,11 @@ function App() {
       if (response.ok && data.success) {
         setBreedInfo(data.info)
       } else {
-        // API key yoksa veya hata varsa sessizce geç
-        console.warn('Gemini AI bilgi alınamadı:', data.error)
-        // Kullanıcıya göstermek için bir mesaj eklenebilir ama şimdilik sessiz
+        // Statik veritabanında bilgi yoksa sessizce geç (hata gösterme)
+        console.log('Bilgi bulunamadı (statik veritabanında henüz eklenmemiş olabilir)')
       }
     } catch (err) {
-      console.warn('Breed info fetch error:', err)
+      console.log('Breed info fetch error (optional feature):', err)
     } finally {
       setLoadingInfo(false)
     }
@@ -172,6 +182,7 @@ function App() {
     setCatDetection(null)
     setBreedInfo(null)
     setCatAnalysis(null)
+    setCatAnalysisError(null)
   }
 
   const handleBackgroundChange = (theme) => {
@@ -208,6 +219,13 @@ function App() {
     <div className="app">
       <div className="container">
         <header className="header" style={{ background: headerThemes[headerColor] }}>
+          <button 
+            className="theme-toggle-btn header-toggle"
+            onClick={handleThemeToggle}
+            title={isDarkMode ? 'Açık Tema' : 'Koyu Tema'}
+          >
+            {isDarkMode ? '🌙' : '☀️'}
+          </button>
           <div className="header-content">
             <div className="header-left">
               <div>
@@ -232,15 +250,6 @@ function App() {
                       />
                     ))}
                   </div>
-                </div>
-                <div className="theme-selector theme-toggle-container" style={{ padding: '4px 4px' }}>
-                  <button 
-                    className="theme-toggle-btn"
-                    onClick={handleThemeToggle}
-                    title={isDarkMode ? 'Açık Tema' : 'Koyu Tema'}
-                  >
-                    {isDarkMode ? '🌙' : '☀️'}
-                  </button>
                 </div>
               </div>
               <div className="theme-selector">
@@ -389,7 +398,7 @@ function App() {
               <div className="cat-analysis-container">
                 {catAnalysis && (
                   <div className="cat-analysis-box">
-                    <h3>🔍 Fotoğraf Analizi (Gemini Vision AI)</h3>
+                    <h3>🔍 Fotoğraf Analizi</h3>
                     <div className="breed-info-content">
                       {catAnalysis.split('\n').map((paragraph, index) => (
                         paragraph.trim() && (
@@ -399,9 +408,21 @@ function App() {
                     </div>
                   </div>
                 )}
+                
+                {catAnalysisError && !catAnalysis && (
+                  <div className="breed-info-box" style={{ borderLeftColor: '#ff9800', background: '#1E1E1E' }}>
+                    <h3>⚠️ Görsel Analiz</h3>
+                    <div className="breed-info-content">
+                      <p>{catAnalysisError}</p>
+                      <p style={{ fontSize: '0.85rem', opacity: 0.8, marginTop: '10px' }}>
+                        💡 Not: Kedi cinsi tahmin özelliği normal çalışmaya devam ediyor. Sadece görsel analiz (yaş, sağlık durumu) şu anda kullanılamıyor.
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
 
-              {/* Gemini AI Breed Info */}
+              {/* Breed Info - Using Static Database (FREE) */}
               <div className="breed-info-container">
                 {loadingInfo && (
                   <div className="breed-info-loading">
@@ -411,7 +432,7 @@ function App() {
                 
                 {breedInfo && !loadingInfo && (
                   <div className="breed-info-box">
-                    <h3>📖 {predictions[0].breed} Hakkında (Gemini AI)</h3>
+                    <h3>📖 {predictions[0].breed} Hakkında</h3>
                     <div className="breed-info-content">
                       {breedInfo.split('\n').map((paragraph, index) => (
                         paragraph.trim() && (
