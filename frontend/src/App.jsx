@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import './App-new.css'
-
-const API_BASE_URL = 'http://localhost:5001/api'
+import { API_BASE_URL } from './config'
 
 function App() {
   const [selectedFile, setSelectedFile] = useState(null)
