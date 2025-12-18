@@ -15,6 +15,7 @@ import os
 import sys
 import time
 import json
+import numpy as np
 from functools import lru_cache
 from collections import defaultdict
 
@@ -168,12 +169,26 @@ def preprocess_image(image):
     return image_tensor
 
 
-def predict_breed(image, top_k=5):
-    """Predict cat breed with top-k results"""
+def predict_breed(image, top_k=5, uncertainty_threshold=0.9):
+    """Predict cat breed with top-k results and entropy-based wild cat detection
+    
+    Args:
+        image: PIL Image
+        top_k: Number of top predictions to return
+        uncertainty_threshold: Entropy threshold for wild cat detection (default: 0.9)
+                              Higher values = more conservative detection
+                              Lower values = more aggressive detection
+    
+    Returns:
+        tuple: (results, entropy, is_wild_cat)
+            - results: List of predictions with breed and confidence
+            - entropy: Prediction entropy (uncertainty metric)
+            - is_wild_cat: Boolean indicating if this is likely a wild cat
+    """
     global model, class_names, device
     
     if model is None or class_names is None:
-        return None
+        return None, None, None
     
     try:
         # Preprocess
@@ -186,18 +201,32 @@ def predict_breed(image, top_k=5):
             probabilities = torch.nn.functional.softmax(outputs, dim=1)
             top_probs, top_indices = torch.topk(probabilities, top_k)
         
-        # Format results
+        # Calculate prediction entropy (uncertainty)
+        # High entropy = predictions spread out (wild cat, uncertain)
+        # Low entropy = one prediction dominates (domestic cat, confident)
+        top_probs_np = top_probs[0].cpu().numpy()
+        entropy = -np.sum(top_probs_np * np.log(top_probs_np + 1e-10))
+        
+        # Convert numpy types to native Python types for JSON serialization
+        entropy = float(entropy)
+        
+        # Detect wild cats based on entropy
+        # Domestic cats: Low entropy (~0.3-0.8) - one prediction dominates
+        # Wild cats: High entropy (~0.9-2.0) - predictions spread out
+        is_wild_cat = bool(entropy > uncertainty_threshold)
+        
+        # Format results with native Python types
         results = []
         for prob, idx in zip(top_probs[0], top_indices[0]):
             results.append({
-                'breed': class_names[idx],
-                'confidence': round(prob.item() * 100, 2)
+                'breed': str(class_names[int(idx)]),
+                'confidence': float(round(prob.item() * 100, 2))
             })
         
-        return results
+        return results, round(entropy, 4), is_wild_cat
     except Exception as e:
         print(f"Error in prediction: {e}")
-        return None
+        return None, None, None
 
 
 @app.route('/api/health', methods=['GET'])
@@ -224,8 +253,17 @@ def predict():
         if file.filename == '':
             return jsonify({'error': 'Görsel dosyası seçilmedi'}), 400
         
-        # Read image
-        image = Image.open(io.BytesIO(file.read()))
+        # Read image with format validation
+        try:
+            image_bytes = file.read()
+            image = Image.open(io.BytesIO(image_bytes))
+            
+            # Convert all formats to RGB (RGBA, P, L, CMYK, etc.)
+            if image.mode not in ['RGB']:
+                image = image.convert('RGB')
+                
+        except Exception as e:
+            return jsonify({'error': f'Görsel dosyası açılamadı: {str(e)}'}), 400
         
         # Optional: skip detection flag
         skip_detection = request.form.get('skip_detection', 'false').lower() == 'true'
@@ -245,8 +283,11 @@ def predict():
                 'cat_detected': False
             }), 400
         
-        # Predict breed
-        results = predict_breed(image, top_k=5)
+        # Get uncertainty threshold from request (optional)
+        uncertainty_threshold = float(request.form.get('uncertainty_threshold', '0.9'))
+        
+        # Predict breed with entropy-based wild cat detection
+        results, entropy, is_wild_cat = predict_breed(image, top_k=5, uncertainty_threshold=uncertainty_threshold)
         
         if results is None:
             return jsonify({'error': 'Tahmin başarısız oldu'}), 500
@@ -292,10 +333,25 @@ def predict():
         response_data = {
             'success': True,
             'predictions': results,
+            'entropy': entropy,
+            'is_wild_cat': is_wild_cat,
+            'uncertainty_threshold': uncertainty_threshold,
             'cat_detection': {
                 'detected': cat_detected,
                 'confidence': round(cat_confidence * 100, 2),
                 'message': detection_message
+            },
+            'wild_cat_info': {
+                'detected': is_wild_cat,
+                'entropy': entropy,
+                'threshold': uncertainty_threshold,
+                'explanation': (
+                    "🦁 VAHŞİ KEDİ TESPİT EDİLDİ! Bu kedi türü veri setinde yok. "
+                    "Model 59 ev kedisi ırkı için eğitildi. Muhtemel sebepler: "
+                    "Vahşi kedi (vaşak, puma, kaplan vb.), Hibrit tür, Çok kötü fotoğraf kalitesi"
+                ) if is_wild_cat else (
+                    "✅ Ev kedisi tespit edildi. Tahmin güvenilir."
+                )
             }
         }
         

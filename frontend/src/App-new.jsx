@@ -17,8 +17,6 @@ function App() {
   const [showAbout, setShowAbout] = useState(false)
   const [showHow, setShowHow] = useState(false)
   const [showPrivacy, setShowPrivacy] = useState(false)
-  const [breedInfo, setBreedInfo] = useState(null)
-  const [loadingBreedInfo, setLoadingBreedInfo] = useState(false)
 
   const processFile = (file) => {
     if (file) {
@@ -101,34 +99,10 @@ function App() {
       setEntropy(data.entropy)
       setIsWildCat(data.is_wild_cat)
       setWildCatInfo(data.wild_cat_info)
-      
-      // Fetch breed info if not wild cat
-      if (!data.is_wild_cat && data.predictions && data.predictions.length > 0) {
-        fetchBreedInfo(data.predictions[0].breed)
-      }
     } catch (err) {
       setError(err.message)
     } finally {
       setLoading(false)
-    }
-  }
-
-  const fetchBreedInfo = async (breedName) => {
-    setLoadingBreedInfo(true)
-    try {
-      const response = await fetch(`${API_BASE_URL}/breed-info`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ breed: breedName })
-      })
-      const data = await response.json()
-      if (response.ok && data.success) {
-        setBreedInfo(data.info)
-      }
-    } catch (err) {
-      console.log('Breed info error:', err)
-    } finally {
-      setLoadingBreedInfo(false)
     }
   }
 
@@ -141,7 +115,6 @@ function App() {
     setEntropy(null)
     setIsWildCat(false)
     setWildCatInfo(null)
-    setBreedInfo(null)
   }
 
   return (
@@ -178,10 +151,10 @@ function App() {
                 {loading && (
                   <div className="loading-circle">
                     <div className="spinner"></div>
-                    <span className="loading-text">ANALİZ EDİLİYOR...</span>
+                    <span className="loading-text">ANALİZ EDİLİYOR</span>
                   </div>
                 )}
-                <p className="upload-text">Yüklemek için fotoğrafı buraya bırakabilirsiniz.</p>
+                <p className="upload-text">Yüklemen için buraya sürükleyin<br />veya Görsel</p>
                 <label className="upload-button">
                   <input
                     type="file"
@@ -278,43 +251,13 @@ function App() {
                 </button>
               </div>
             </div>
-
-            {/* Breed Wiki Information */}
-            {breedInfo && (
-              <div className="breed-wiki-section">
-                <h2 className="wiki-title">📚 {predictions[0].breed} Hakkında</h2>
-                <div className="wiki-content">
-                  {breedInfo.split('\n\n').map((section, index) => {
-                    const lines = section.split('\n')
-                    const title = lines[0]
-                    const content = lines.slice(1).join('\n')
-                    
-                    return (
-                      <div key={index} className="wiki-section">
-                        <h3 className="wiki-section-title">{title}</h3>
-                        {content.split('\n').map((line, i) => (
-                          line.trim() && <p key={i} className="wiki-text">{line}</p>
-                        ))}
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            )}
-
-            {loadingBreedInfo && (
-              <div className="breed-wiki-loading">
-                <div className="spinner"></div>
-                <p>Irk bilgileri yükleniyor...</p>
-              </div>
-            )}
           </div>
         )}
 
         {/* Footer */}
         <footer className="patipedia-footer">
           <button onClick={() => setShowAbout(true)}>Hakkında</button>
-          <button onClick={() => setShowHow(true)}>Nasıl Çalışır?</button>
+          <button onClick={() => setShowHow(true)}>Nasıl Çalışır</button>
           <button onClick={() => setShowPrivacy(true)}>Gizlilik</button>
         </footer>
       </div>
@@ -325,7 +268,7 @@ function App() {
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <button className="modal-close" onClick={() => setShowAbout(false)}>×</button>
             <h2>Hakkında</h2>
-            <p>PatiPedia, son teknoloji derin öğrenme algoritmaları ile geliştirilen, kedi cinsi tanıma ve bilgi platformudur. Sistem, iki aşamalı yapay zeka mimarisi kullanarak 59 farklı kedi ırkını yüksek doğrulukla tanıyabilir.</p>
+            <p>PatiPedia, yapay zeka destekli kedi cinsi tanıma sistemidir. ResNet50 derin öğrenme modeli ve YOLO nesne tespiti kullanılarak 59 farklı kedi ırkını %64 doğrulukla tanıyabilir.</p>
           </div>
         </div>
       )}

@@ -27,6 +27,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application files
 COPY app_resnet50.py .
+COPY api.py .
 COPY predict_resnet50.py .
 COPY ensemble_model.py .
 COPY transformer_models.py .
@@ -46,8 +47,11 @@ RUN mkdir -p runs/optimal_ensemble
 # COPY runs/resnet50_v2/weights/best.pth runs/resnet50_v2/weights/
 # COPY runs/optimal_ensemble/optimal_ensemble_final.pth runs/optimal_ensemble/
 
-# Expose Streamlit port
-EXPOSE 8501
+# Copy cat breed info database
+COPY cat_breed_info.json .
+
+# Expose ports: Streamlit (8501) and Flask API (5001)
+EXPOSE 8501 5001
 
 # Default: Run ResNet50 app (can be overridden)
 CMD ["streamlit", "run", "app_resnet50.py", "--server.port=8501", "--server.address=0.0.0.0", "--server.headless=true", "--server.enableCORS=false", "--server.enableXsrfProtection=false"]
