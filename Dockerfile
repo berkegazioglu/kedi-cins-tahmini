@@ -50,8 +50,8 @@ RUN mkdir -p runs/optimal_ensemble
 # Copy cat breed info database
 COPY cat_breed_info.json .
 
-# Expose ports: Streamlit (8501) and Flask API (5001)
-EXPOSE 8501 5001
+# Expose port 7860 (Hugging Face Spaces default)
+EXPOSE 7860
 
-# Default: Run ResNet50 app (can be overridden)
-CMD ["streamlit", "run", "app_resnet50.py", "--server.port=8501", "--server.address=0.0.0.0", "--server.headless=true", "--server.enableCORS=false", "--server.enableXsrfProtection=false"]
+# Run app.py (Flask API + React frontend)
+CMD ["python", "app.py"]
