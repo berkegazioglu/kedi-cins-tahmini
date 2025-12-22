@@ -1,0 +1,18 @@
+{
+  "name": "best.pth",
+  "path": "runs/resnet50_v2/weights/best.pth",
+  "sha": "592e23709e54aa083208a12b2da3a13d3b24468f",
+  "size": 283884516,
+  "url": "https://api.github.com/repos/berkegazioglu/kedi-cins-tahmini/contents/runs/resnet50_v2/weights/best.pth?ref=main",
+  "html_url": "https://github.com/berkegazioglu/kedi-cins-tahmini/blob/main/runs/resnet50_v2/weights/best.pth",
+  "git_url": "https://api.github.com/repos/berkegazioglu/kedi-cins-tahmini/git/blobs/592e23709e54aa083208a12b2da3a13d3b24468f",
+  "download_url": "https://media.githubusercontent.com/media/berkegazioglu/kedi-cins-tahmini/main/runs/resnet50_v2/weights/best.pth?token=BIWUDJQVHN5BUJ2ATNRN3WLJFGRWE",
+  "type": "file",
+  "content": "dmVyc2lvbiBodHRwczovL2dpdC1sZnMuZ2l0aHViLmNvbS9zcGVjL3YxCm9p\nZCBzaGEyNTY6ZDUzZDkyMDk4N2EwNzJjNDJjMGNkYzZhOWZiMDk3OTYzYmQy\nZGM5NjlkYTM3MDY3OTI1M2UwMjBkODUyZjFhMApzaXplIDI4Mzg4NDUxNgo=\n",
+  "encoding": "base64",
+  "_links": {
+    "self": "https://api.github.com/repos/berkegazioglu/kedi-cins-tahmini/contents/runs/resnet50_v2/weights/best.pth?ref=main",
+    "git": "https://api.github.com/repos/berkegazioglu/kedi-cins-tahmini/git/blobs/592e23709e54aa083208a12b2da3a13d3b24468f",
+    "html": "https://github.com/berkegazioglu/kedi-cins-tahmini/blob/main/runs/resnet50_v2/weights/best.pth"
+  }
+}

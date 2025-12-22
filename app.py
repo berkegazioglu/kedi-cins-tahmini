@@ -6,7 +6,7 @@ Hugging Face Spaces Deployment
 import os
 from flask import Flask, send_from_directory, jsonify
 from flask_cors import CORS
-from api import app as api_app, predict_breed, yolo_model, model, class_names, device
+import api
 
 # Flask app
 app = Flask(__name__, static_folder='frontend/dist', static_url_path='')
@@ -18,10 +18,10 @@ def health_check():
     """Health check endpoint"""
     return jsonify({
         'status': 'healthy',
-        'yolo_loaded': yolo_model is not None,
-        'model_loaded': model is not None,
-        'device': str(device),
-        'classes': len(class_names)
+        'yolo_loaded': api.yolo_model is not None,
+        'model_loaded': api.model is not None,
+        'device': str(api.device),
+        'classes': len(api.class_names) if api.class_names else 0
     })
 
 # API endpoints (proxy to api.py)
@@ -29,10 +29,14 @@ def health_check():
 def api_proxy(path):
     """Proxy API requests to api.py"""
     from flask import request
-    with api_app.test_request_context(path='/' + path, method=request.method, 
-                                       data=request.data, headers=request.headers):
+    # Use the original WSGI environment to preserve file uploads and headers
+    # verify path matches
+    environ = request.environ.copy()
+    # The path in environ is already correct (/api/...)
+    
+    with api.app.request_context(environ):
         try:
-            response = api_app.full_dispatch_request()
+            response = api.app.full_dispatch_request()
             return response
         except Exception as e:
             return jsonify({'error': str(e)}), 500
@@ -48,9 +52,18 @@ def serve_frontend(path):
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 7860))  # HF Spaces uses port 7860
+    # Load models before starting
+    print("⏳ Loading models...")
+    api.load_models()
+    
     print(f"🚀 PatiPedia starting on port {port}")
-    print(f"🐱 YOLO loaded: {yolo_model is not None}")
-    print(f"🧠 Model loaded: {model is not None}")
-    print(f"💻 Device: {device}")
-    print(f"📊 Classes: {len(class_names)}")
+    print(f"🐱 YOLO loaded: {api.yolo_model is not None}")
+    print(f"🧠 Model loaded: {api.model is not None}")
+    print(f"💻 Device: {api.device}")
+    
+    if api.class_names:
+        print(f"📊 Classes: {len(api.class_names)}")
+    else:
+        print("⚠️ Classes not loaded")
+        
     app.run(host='0.0.0.0', port=port, debug=False)

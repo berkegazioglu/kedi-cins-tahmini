@@ -1,52 +1,11 @@
-# Python cache
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-
-# Virtual environment
-.venv/
-venv/
-ENV/
-env/
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# Model files - now tracked by Git LFS
-# *.pth files are tracked via Git LFS (.gitattributes)
-*.pt
-!yolo11n.pt
-
-# Data
-images/
-images_split/
-data/
-*.csv
-
-# Training outputs - weights now tracked by Git LFS
-# runs/*/weights/*.pth tracked via Git LFS
-runs/*/plots/
-runs/*/evaluation/
-
-# Logs
-*.log
-training_log.txt
-
-# OS
+__pycache__
+*.pyc
+.venv
 .DS_Store
-Thumbs.db
-
-# Uploads
-uploads/
-
-# Archive
-archive/
-
-# Temp files
-*.tmp
-*.bak
+node_modules
+dist
+build
+*.spec
+# Large model files (downloaded during build)
+runs/resnet50_v2/weights/best.pth
+runs/optimal_ensemble/optimal_ensemble_final.pth
