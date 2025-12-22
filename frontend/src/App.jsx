@@ -25,7 +25,7 @@ function App() {
       setPredictions(null)
       setError(null)
       setCatDetection(null)
-      
+
       const reader = new FileReader()
       reader.onloadend = () => {
         setPreview(reader.result)
@@ -100,7 +100,7 @@ function App() {
       setEntropy(data.entropy)
       setIsWildCat(data.is_wild_cat)
       setWildCatInfo(data.wild_cat_info)
-      
+
       // Fetch breed info if not wild cat
       if (!data.is_wild_cat && data.predictions && data.predictions.length > 0) {
         fetchBreedInfo(data.predictions[0].breed)
@@ -158,13 +158,28 @@ function App() {
         <h1 className="main-title">Evcil Kedi Türü Tanıma Sistemi</h1>
 
         {/* Upload Area */}
-        {!predictions && !isWildCat && (
-          <div 
+        {!predictions && !isWildCat && !isUncertain && (
+          <div
             className={`upload-area ${isDragging ? 'dragging' : ''}`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
           >
+            {/* Added Threshold Slider */}
+            <div className="threshold-container">
+              <label className="threshold-label" title="Modelin bir tahmini kabul etmesi için gereken minimum güven oranı">
+                Güvenilirlik Eşiği: <strong>%{confidenceThreshold}</strong>
+              </label>
+              <input
+                type="range"
+                min="10"
+                max="50"
+                value={confidenceThreshold}
+                onChange={handleThresholdChange}
+                className="threshold-slider"
+              />
+            </div>
+
             {!preview ? (
               <div className="upload-content">
                 <div className="upload-icon">
@@ -220,33 +235,61 @@ function App() {
           </div>
         )}
 
-        {/* Wild Cat Alert */}
-        {wildCatInfo && isWildCat && (
+        {/* Wild Cat OR Uncertain Alert */}
+        {(isWildCat || isUncertain) && (
           <div className="wild-cat-alert">
-            <h2>🦁 Vahşi Kedi Tespit Edildi!</h2>
+            <h2>{isWildCat ? '🦁 Vahşi Kedi Tespit Edildi!' : '❌ Belirsiz / Veri Seti Dışı'}</h2>
+
             <div className="wild-cat-gif">
-              <img 
-                src="/wild-cat.gif" 
-                alt="Vahşi Kedi" 
-                onError={(e) => {
-                  e.target.style.display = 'none'
-                  e.target.parentElement.innerHTML = '<div class="wild-cat-emoji">🦁🐆🐅</div>'
-                }}
-              />
+              {isWildCat ? (
+                <img
+                  src="/wild-cat.gif"
+                  alt="Vahşi Kedi"
+                  onError={(e) => {
+                    e.target.style.display = 'none'
+                    e.target.parentElement.innerHTML = '<div class="wild-cat-emoji">🦁🐆🐅</div>'
+                  }}
+                />
+              ) : (
+                <div className="wild-cat-emoji">❓</div>
+              )}
             </div>
+
             <p className="wild-cat-text">
-              Bu görseldeki hayvan <strong>vahşi bir kedi türüdür.</strong>
-              <br/>
+              {isWildCat ? (
+                "Bu görseldeki hayvan vahşi bir kedi türüdür."
+              ) : (
+                <>
+                  Modelin tahmini güvenilirlik eşiğinin (<strong>%{confidenceThreshold}</strong>) altında kaldı.
+                  <br />
+                  Bu muhtemelen <strong>veri setinde olmayan</strong> veya <strong>karışık/belirsiz</strong> bir tür.
+                </>
+              )}
+              <br />
               Sistemimiz yalnızca <strong>59 ev kedisi ırkı</strong> için eğitilmiştir.
             </p>
+
+            {/* Nearest Matches (Orange/Faded) */}
+            {predictions && (
+              <div className="uncertain-results">
+                <h3>En Yakın Eşleşmeler (Güvenilir Değil):</h3>
+                {predictions.slice(0, 3).map((pred, index) => (
+                  <div key={index} className="uncertain-item">
+                    <span className="alt-name">{pred.breed}</span>
+                    <span className="alt-confidence">%{pred.confidence.toFixed(1)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
             <button className="reset-button" onClick={handleReset}>
               Yeni Fotoğraf Yükle
             </button>
           </div>
         )}
 
-        {/* Results */}
-        {predictions && !isWildCat && (
+        {/* Results (Normal) */}
+        {predictions && !isWildCat && !isUncertain && (
           <div className="results-container">
             <div className="result-card">
               {preview && (
@@ -259,7 +302,7 @@ function App() {
                 <h2 className="result-breed">Kedi Türü: {predictions[0].breed}</h2>
                 <p className="result-confidence">Kesinlik: %{predictions[0].confidence.toFixed(1)}</p>
                 <p className="result-description">Başarılı, tanımlı ve sosyal bir ırkıdır</p>
-                
+
                 {predictions.length > 1 && (
                   <div className="alternative-results">
                     <h3>Diğer Olası Türler:</h3>
@@ -287,7 +330,7 @@ function App() {
                     const lines = section.split('\n')
                     const title = lines[0]
                     const content = lines.slice(1).join('\n')
-                    
+
                     return (
                       <div key={index} className="wiki-section">
                         <h3 className="wiki-section-title">{title}</h3>
