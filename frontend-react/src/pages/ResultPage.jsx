@@ -288,7 +288,7 @@ export default function ResultPage() {
               <h4>Hakkında</h4>
               <Link to="/about">Hakkımızda</Link>
               <Link to="/privacy-policy">Gizlilik Politikası</Link>
-              <a href="#">Hizmet Şartları</a>
+              <Link to="/terms-of-service">Hizmet Şartları</Link>
             </div>
             <div className="footer-col">
               <h4>Temas etmek</h4>
