@@ -517,7 +517,7 @@ function App() {
             </div>
             <div className="footer-col">
               <h4>Hakkında</h4>
-              <a href="#">Hakkımızda</a>
+              <Link to="/about">Hakkımızda</Link>
               <a href="#">Gizlilik Politikası</a>
               <a href="#">Hizmet Şartları</a>
             </div>
