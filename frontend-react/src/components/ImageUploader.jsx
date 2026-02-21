@@ -3,7 +3,7 @@ import './ImageUploader.css';
 
 const SAMPLE_THUMBS = [
   'https://whatbreedismycat.app/cat/persian.jpg',
-  'https://whatbreedismycat.app/cat/maine-coon.jpg',
+  'https://whatbreedismycat.app/cat/bengal.jpg',
   'https://whatbreedismycat.app/cat/british-shorthair.jpg',
   'https://whatbreedismycat.app/cat/siamese.jpg',
 ];
