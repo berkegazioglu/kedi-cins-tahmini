@@ -49,6 +49,10 @@
 .ab-cta-text { font-size: 1.1rem; color: #475569; margin: 0; }
 .ab-cta-btn { padding: 0.9rem 2rem; font-size: 1rem; border-radius: 999px; cursor: pointer; border: none; }
 
+/* Team avatars */
+.ab-team-avatars { display: flex; gap: 0.75rem; align-items: center; margin-left: auto; flex-shrink: 0; }
+.ab-team-avatar { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; border: 3px solid #e2e8f0; }
+
 /* Responsive */
 @media (max-width: 768px) {
   .ab-title { font-size: 1.75rem; }
