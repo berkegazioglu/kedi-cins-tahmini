@@ -24,12 +24,12 @@ WORKDIR /app
 
 # ── Python bağımlılıkları (CPU PyTorch) ───────
 COPY requirements.txt .
-# Install torch CPU wheel first (must use +cpu suffix to match wheel filename in index)
-RUN pip install --no-cache-dir \
-    "torch==2.5.1+cpu" "torchvision==0.20.1+cpu" \
+# Install torch CPU-only (no CUDA, smaller wheel ~200MB)
+RUN pip install --no-cache-dir --timeout 120 \
+    torch torchvision \
     --index-url https://download.pytorch.org/whl/cpu
-# Install remaining deps (torch already installed, ultralytics won't re-download it)
-RUN pip install --no-cache-dir -r requirements.txt
+# Install remaining deps
+RUN pip install --no-cache-dir --timeout 120 -r requirements.txt
 
 # ── Frontend dist (stage 1'den kopyala) ───────
 COPY --from=frontend-builder /app/frontend-react/dist /app/frontend-react/dist
