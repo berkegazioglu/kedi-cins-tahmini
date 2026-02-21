@@ -2,7 +2,7 @@
 FastAPI Backend for Cat Breed Classification
 2-Stage Pipeline: YOLO11n Detection → Optimal Ensemble Classification
 """
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, UploadFile, HTTPException, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -19,6 +19,9 @@ app = FastAPI(
     description="AI-powered cat breed recognition with 2-stage pipeline (YOLO + Ensemble)",
     version="3.0.0"
 )
+
+# API router — tüm endpoint'ler /api prefix ile de erişilebilir
+api_router = APIRouter(prefix="/api")
 
 # CORS middleware
 app.add_middleware(
@@ -123,9 +126,9 @@ async def startup_event():
     print("="*50)
 
 
-@app.get("/")
+@api_router.get("/")
 async def root():
-    """Root endpoint"""
+    """API root endpoint"""
     return {
         "message": "Cat Breed Classification API",
         "version": "3.0.0",
@@ -139,7 +142,7 @@ async def root():
     }
 
 
-@app.get("/health")
+@api_router.get("/health")
 async def health_check():
     """Health check endpoint"""
     return {
@@ -150,7 +153,7 @@ async def health_check():
     }
 
 
-@app.get("/info")
+@api_router.get("/info")
 async def get_info():
     """Get API information"""
     return {
@@ -184,7 +187,7 @@ async def get_info():
     }
 
 
-@app.get("/breeds")
+@api_router.get("/breeds")
 async def list_breeds():
     """List all available cat breeds"""
     if class_names is None:
@@ -196,7 +199,7 @@ async def list_breeds():
     }
 
 
-@app.get("/breeds/{breed_name}")
+@api_router.get("/breeds/{breed_name}")
 async def get_breed_info_endpoint(breed_name: str):
     """Get detailed information about a specific breed"""
     if breed_info is None:
@@ -211,7 +214,7 @@ async def get_breed_info_endpoint(breed_name: str):
     }
 
 
-@app.post("/predict")
+@api_router.post("/predict")
 async def predict_breed(
     file: UploadFile = File(...),
     skip_detection: bool = False,
@@ -269,20 +272,45 @@ async def predict_breed(
         raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
 
 
+# ── API Router'ı kaydet ─────────────────────────────────────────────────────
+app.include_router(api_router)
+
 # ── React Frontend Static Dosya Servisi ──────────────────────────────────────
 # Docker build'de React dist/ klasörü /app/frontend-react/dist'e kopyalanır.
-# Tüm API route'ları yukarıda tanımlandığından, catch-all static mount çakışmaz.
+# api_router zaten /api/* path'lerini alıyor; catch-all sadece geri kalanı yakalar.
 FRONTEND_DIST = Path("/app/frontend-react/dist")
-if FRONTEND_DIST.exists():
-    # React Router için: bilinmeyen path'lerde index.html döndür
-    @app.get("/{full_path:path}", include_in_schema=False)
-    async def serve_frontend(full_path: str):
+
+@app.get("/{full_path:path}", include_in_schema=False)
+async def serve_frontend(full_path: str):
+    """React Router desteği: bilinmeyen path'lerde index.html döndür"""
+    if FRONTEND_DIST.exists():
         static_file = FRONTEND_DIST / full_path
         if static_file.exists() and static_file.is_file():
             return FileResponse(str(static_file))
-        return FileResponse(str(FRONTEND_DIST / "index.html"))
+        index = FRONTEND_DIST / "index.html"
+        if index.exists():
+            return FileResponse(str(index))
+    # Frontend build yok — API bilgisi göster
+    return JSONResponse({
+        "message": "Cat Breed Classification API",
+        "version": "3.0.0",
+        "status": "running",
+        "note": "Frontend build bulunamadı. /api/ prefix ile API'ye erişin."
+    })
 
-    app.mount("/", StaticFiles(directory=str(FRONTEND_DIST), html=True), name="frontend")
+@app.get("/", include_in_schema=False)
+async def serve_root():
+    """Root path → React frontend index.html"""
+    if FRONTEND_DIST.exists():
+        index = FRONTEND_DIST / "index.html"
+        if index.exists():
+            return FileResponse(str(index))
+    return JSONResponse({
+        "message": "Cat Breed Classification API",
+        "version": "3.0.0",
+        "status": "running",
+        "api_docs": "/docs"
+    })
 
 
 if __name__ == "__main__":

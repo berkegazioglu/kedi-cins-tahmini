@@ -10,7 +10,7 @@ WORKDIR /app/frontend-react
 COPY frontend-react/ .
 RUN mkdir -p public/cat-sounds
 RUN npm install --legacy-peer-deps
-RUN VITE_API_URL="" npm run build
+RUN VITE_API_URL="/api" npm run build
 
 # ── Stage 2: Python backend (torch pre-installed) ───────────
 FROM pytorch/pytorch:2.1.0-cuda11.8-cudnn8-runtime
