@@ -28,6 +28,13 @@ ENV/
 
 # Training outputs
 runs/
+
+# LFS binary assets — Docker build sırasında curl ile indiriliyor
+frontend-react/public/cat-sounds/
+frontend-react/public/avatar-balinese.jpg
+frontend-react/public/avatar-bombay.jpg
+frontend-react/public/avatar-siamese.jpg
+frontend-react/public/kedi-ai-logo.png
 wandb/
 *.log
 

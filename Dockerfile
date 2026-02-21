@@ -20,9 +20,17 @@ RUN pip install --no-cache-dir \
     torch torchvision --index-url https://download.pytorch.org/whl/cpu \
     && pip install --no-cache-dir -r requirements.txt
 
-# ── React frontend build ───────────────────────
+# ── React frontend bağımlılıkları ─────────────
 COPY frontend-react/ frontend-react/
 WORKDIR /app/frontend-react
+
+# LFS binary assets: curl ile indir (build context dışında bırakıldı)
+RUN mkdir -p public/cat-sounds \
+    && curl -sL "https://media.githubusercontent.com/media/berkegazioglu/kedi-cins-tahmini/hf-final/frontend-react/public/kedi-ai-logo.png" -o public/kedi-ai-logo.png \
+    && curl -sL "https://images.unsplash.com/photo-1513360371669-4adf3dd7dff8?w=80&h=80&fit=crop" -o public/avatar-siamese.jpg \
+    && curl -sL "https://images.unsplash.com/photo-1573865526739-10659fec78a5?w=80&h=80&fit=crop" -o public/avatar-bombay.jpg \
+    && curl -sL "https://images.unsplash.com/photo-1548247416-ec66f4900b2e?w=80&h=80&fit=crop" -o public/avatar-balinese.jpg
+
 RUN npm install --legacy-peer-deps
 # VITE_API_URL="" → relative URL, same-origin API calls
 RUN VITE_API_URL="" npm run build
