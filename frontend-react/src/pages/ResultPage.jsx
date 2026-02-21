@@ -34,7 +34,6 @@ const BREED_IMG_MAP = {
   'Egzotik Shorthair':        'https://images.unsplash.com/photo-1574158622682-e40e69881006?w=400&h=300&fit=crop',
   'Ragdoll':                  'https://images.unsplash.com/photo-1555685812-4b943f1cb0eb?w=400&h=300&fit=crop',
   'Manx':                     'https://images.unsplash.com/photo-1609220136736-443140cfeaa8?w=400&h=300&fit=crop',
-  'Munchkin':                 'https://images.unsplash.com/photo-1543852786-1cf6624b9987?w=400&h=300&fit=crop',
 };
 
 function breedImg(breedName) {
