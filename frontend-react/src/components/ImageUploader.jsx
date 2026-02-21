@@ -2,10 +2,10 @@
 import './ImageUploader.css';
 
 const SAMPLE_THUMBS = [
-  'https://images.unsplash.com/photo-1574144611937-0df059b5ef3e?w=120&h=120&fit=crop',
-  'https://images.unsplash.com/photo-1548802673-380ab8ebc7b7?w=120&h=120&fit=crop',
-  'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=120&h=120&fit=crop',
-  'https://images.unsplash.com/photo-1533743983669-94fa5c4338ec?w=120&h=120&fit=crop',
+  'https://whatbreedismycat.app/cat/persian.jpg',
+  'https://whatbreedismycat.app/cat/maine-coon.jpg',
+  'https://whatbreedismycat.app/cat/british-shorthair.jpg',
+  'https://whatbreedismycat.app/cat/siamese.jpg',
 ];
 
 const ImageUploader = ({ onImageSelect, onPredict, isLoading, preview, results, error, onReset }) => {
