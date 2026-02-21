@@ -5,6 +5,8 @@ FastAPI Backend for Cat Breed Classification
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from PIL import Image
 import io
 import json
@@ -267,6 +269,22 @@ async def predict_breed(
         raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
 
 
+# ── React Frontend Static Dosya Servisi ──────────────────────────────────────
+# Docker build'de React dist/ klasörü /app/frontend-react/dist'e kopyalanır.
+# Tüm API route'ları yukarıda tanımlandığından, catch-all static mount çakışmaz.
+FRONTEND_DIST = Path("/app/frontend-react/dist")
+if FRONTEND_DIST.exists():
+    # React Router için: bilinmeyen path'lerde index.html döndür
+    @app.get("/{full_path:path}", include_in_schema=False)
+    async def serve_frontend(full_path: str):
+        static_file = FRONTEND_DIST / full_path
+        if static_file.exists() and static_file.is_file():
+            return FileResponse(str(static_file))
+        return FileResponse(str(FRONTEND_DIST / "index.html"))
+
+    app.mount("/", StaticFiles(directory=str(FRONTEND_DIST), html=True), name="frontend")
+
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=7860)

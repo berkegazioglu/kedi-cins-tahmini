@@ -1,3 +1,22 @@
+---
+title: Kedi.ai
+emoji: 🐱
+colorFrom: pink
+colorTo: purple
+sdk: docker
+app_port: 7860
+short_description: Yapay Zeka ile kedi ırkı tanımlama — 59 cins, ücretsiz
+tags:
+  - cat
+  - breed
+  - classification
+  - pytorch
+  - computer-vision
+  - fastapi
+  - react
+pinned: true
+---
+
 # 🐱 Kedi Cinsi Tahmin Uygulaması
 
 Derin öğrenme tabanlı gelişmiş kedi cinsi sınıflandırma sistemi. 59 farklı kedi cinsini yüksek doğrulukla tahmin eder.
