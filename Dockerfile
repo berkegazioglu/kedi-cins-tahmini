@@ -12,20 +12,15 @@ RUN mkdir -p public/cat-sounds
 RUN npm install --legacy-peer-deps
 RUN VITE_API_URL="" npm run build
 
-# ── Stage 2: Python backend ─────────────────────────────────
-FROM python:3.10
+# ── Stage 2: Python backend (torch pre-installed) ───────────
+FROM pytorch/pytorch:2.1.0-cuda11.8-cudnn8-runtime
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgl1-mesa-glx libglib2.0-0 libsm6 libxext6 \
-    libxrender-dev libgomp1 \
+    libxrender-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-
-# ── PyTorch CPU (2.1.0 — well-established CPU wheels) ───────
-RUN pip install --no-cache-dir \
-    torch==2.1.0 torchvision==0.16.0 \
-    --index-url https://download.pytorch.org/whl/cpu
 
 # ── Remaining Python deps ─────────────────────────────────
 COPY requirements.txt .
