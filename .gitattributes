@@ -12,3 +12,5 @@
 frontend-react/public/cats/*.jpg !filter !diff !merge
 frontend-react/public/*.jpg !filter !diff !merge
 frontend-react/public/*.png !filter !diff !merge
+# Cat sounds as OGG (small ~77KB each) — no LFS needed
+frontend-react/public/cat-sounds/*.ogg !filter !diff !merge

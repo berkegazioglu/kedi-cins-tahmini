@@ -141,13 +141,21 @@ export default function CatTranslator() {
     }, 1400);
   };
 
+  // currentSound her değiştiğinde audio elementi yenile ve otomatik çal
+  useEffect(() => {
+    if (!currentSound || !audioRef.current) return;
+    audioRef.current.load();
+    audioRef.current.play().catch(() => {});  // autoplay policy — kullanıcı etkileşimi sonrası çalışır
+    setIsPlaying(true);
+  }, [currentSound]);
+
   const handlePlay = () => {
     if (!audioRef.current) return;
     if (isPlaying) {
       audioRef.current.pause();
       setIsPlaying(false);
     } else {
-      audioRef.current.play();
+      audioRef.current.play().catch(() => {});
       setIsPlaying(true);
     }
   };
@@ -155,9 +163,15 @@ export default function CatTranslator() {
   const handleNewSound = () => {
     if (!soundMapping || !detectedIntent) return;
     const wav = pickSound(detectedIntent, soundMapping);
-    if (wav) {
+    if (wav && wav !== currentSound) {
       setCurrentSound(wav);
-      setIsPlaying(false);
+    } else if (wav) {
+      // Aynı dosya seçildiyse baştan çal
+      if (audioRef.current) {
+        audioRef.current.currentTime = 0;
+        audioRef.current.play().catch(() => {});
+        setIsPlaying(true);
+      }
     }
   };
 
@@ -232,6 +246,7 @@ export default function CatTranslator() {
                           <audio
                             ref={audioRef}
                             src={`/cat-sounds/${currentSound}`}
+                            preload="auto"
                             onEnded={() => setIsPlaying(false)}
                             onPlay={() => setIsPlaying(true)}
                             onPause={() => setIsPlaying(false)}
