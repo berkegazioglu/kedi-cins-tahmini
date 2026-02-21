@@ -44,16 +44,22 @@ const AboutPage = () => {
               <p className="ab-intro-quote">"Kanepemin üzerindeki bu küçük tüy yumağı ne tür bir kedi?"</p>
             </div>
             <div className="ab-team-avatars">
-              <img
-                src="https://media.licdn.com/dms/image/v2/D4D03AQFGzUjNQ0RUxw/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1686936614258?e=1773273600&v=beta&t=4dDglwExSHBHhEXXZE4lxAnZ_vqZmOUCJBY0Z8_eWjM"
-                alt="Ekip üyesi 1"
-                className="ab-team-avatar"
-              />
-              <img
-                src="https://media.licdn.com/dms/image/v2/D4E03AQF35fXpvYdmMA/profile-displayphoto-shrink_400_400/B4EZRo0I.tHAAo-/0/1736925286750?e=1773273600&v=beta&t=i6ksbSgh6quI2Ln77mi7RYy9sXoDcTfUdpUNifSndAw"
-                alt="Ekip üyesi 2"
-                className="ab-team-avatar"
-              />
+              <div className="ab-team-member">
+                <img
+                  src="https://media.licdn.com/dms/image/v2/D4D03AQFGzUjNQ0RUxw/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1686936614258?e=1773273600&v=beta&t=4dDglwExSHBHhEXXZE4lxAnZ_vqZmOUCJBY0Z8_eWjM"
+                  alt="Ş.Berke Gazioglu"
+                  className="ab-team-avatar"
+                />
+                <p className="ab-team-name">Ş.Berke Gazioğlu</p>
+              </div>
+              <div className="ab-team-member">
+                <img
+                  src="https://media.licdn.com/dms/image/v2/D4E03AQF35fXpvYdmMA/profile-displayphoto-shrink_400_400/B4EZRo0I.tHAAo-/0/1736925286750?e=1773273600&v=beta&t=i6ksbSgh6quI2Ln77mi7RYy9sXoDcTfUdpUNifSndAw"
+                  alt="Ş.Barkın Özcan"
+                  className="ab-team-avatar"
+                />
+                <p className="ab-team-name">Ş.Barkın Özcan</p>
+              </div>
             </div>
           </div>
         </div>
