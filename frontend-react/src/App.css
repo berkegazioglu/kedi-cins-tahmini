@@ -48,15 +48,18 @@ button { cursor: pointer; font-family: inherit; border: none; }
 .samples-section { padding: 5rem 1.5rem; background: var(--bg-light); }
 .carousel-wrap { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
 .carousel-track { flex: 1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; }
-.car-item { text-align: center; }
-.car-item img { width: 100%; aspect-ratio: 3/4; object-fit: cover; border-radius: var(--radius); margin-bottom: 0.6rem; }
+.car-item { text-align: center; animation: carFadeIn 0.5s ease; }
+@keyframes carFadeIn { from { opacity: 0; transform: translateX(18px); } to { opacity: 1; transform: translateX(0); } }
+.car-item img { width: 100%; aspect-ratio: 3/4; object-fit: cover; border-radius: var(--radius); margin-bottom: 0.6rem; transition: transform 0.3s ease; }
+.car-item img:hover { transform: scale(1.03); }
 .car-item p { font-size: 0.9rem; font-weight: 600; color: var(--navy); }
 .car-btn { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--border); background: #fff; font-size: 1.4rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; color: var(--navy); }
 .car-btn:hover:not(:disabled) { border-color: var(--pink); color: var(--pink); }
 .car-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-.car-dots { display: flex; justify-content: center; gap: 6px; }
-.dot { width: 10px; height: 10px; border-radius: 50%; background: var(--border); border: none; cursor: pointer; transition: background 0.2s; padding: 0; }
-.dot.active { background: var(--pink); }
+.car-dots { display: flex; justify-content: center; gap: 8px; margin-top: 1rem; }
+.dot { width: 12px; height: 12px; border-radius: 50%; background: #d1d5db; border: none; cursor: pointer; padding: 0; transition: background 0.4s ease, transform 0.4s ease; }
+.dot:hover { background: #9ca3af; }
+.dot.active { background: #4b5563; transform: scale(1.25); }
 /* HOW IT WORKS */
 .hiw-section { padding: 5rem 1.5rem; background: var(--bg); }
 .hiw-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }

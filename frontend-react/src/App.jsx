@@ -222,7 +222,7 @@ function App() {
             <button className="car-btn" onClick={() => setCarouselIdx(i => Math.max(i - 1, 0))} disabled={carouselIdx === 0}>‹</button>
             <div className="carousel-track">
               {SAMPLE_CATS.slice(carouselIdx, carouselIdx + VISIBLE_COUNT).map(cat => (
-                <div className="car-item" key={cat.id}>
+                <div className="car-item" key={`${carouselIdx}-${cat.id}`}>
                   <img src={cat.img} alt={cat.breed} />
                   <p>{cat.breed} <strong className="conf-pink">%{cat.confidence}</strong></p>
                 </div>
@@ -231,9 +231,16 @@ function App() {
             <button className="car-btn" onClick={() => setCarouselIdx(i => (i >= maxIdx ? 0 : i + 1))}>›</button>
           </div>
           <div className="car-dots">
-            {Array.from({ length: maxIdx + 1 }).map((_, i) => (
-              <button key={i} className={`dot ${i === carouselIdx ? 'active' : ''}`} onClick={() => setCarouselIdx(i)} />
-            ))}
+            {Array.from({ length: 8 }).map((_, i) => {
+              const activeDot = Math.round((carouselIdx / maxIdx) * 7);
+              return (
+                <button
+                  key={i}
+                  className={`dot ${i === activeDot ? 'active' : ''}`}
+                  onClick={() => setCarouselIdx(Math.round((i / 7) * maxIdx))}
+                />
+              );
+            })}
           </div>
         </div>
       </section>
