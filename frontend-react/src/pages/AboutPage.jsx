@@ -175,35 +175,29 @@ const AboutPage = () => {
       <footer className="footer">
         <div className="footer-inner">
           <div className="footer-brand">
-            <div className="footer-logo">
-              <img src="/kedi-ai-logo.svg" alt="Kedi.ai" className="footer-logo-img" /> Kedi.ai
-            </div>
+            <div className="footer-logo"><img src="/kedi-ai-logo.svg" alt="Kedi.ai" className="footer-logo-img" /> Kedi.ai</div>
             <p>Kedinizin fotoğrafından ırkını bulmanıza yardımcı olan ücretsiz bir yapay zeka aracıdır.</p>
           </div>
           <div className="footer-cols">
             <div className="footer-col">
-              <p className="footer-col-title">Eğlenceli Araçlar</p>
-              <ul>
-                <li><Link to="/cat-translator">Kedi Çevirmeni</Link></li>
-              </ul>
+              <h4>Eğlenceli Araçlar</h4>
+              <a href="/cat-translator">Kedi Çevirmeni</a>
             </div>
             <div className="footer-col">
-              <p className="footer-col-title">Hakkında</p>
-              <ul>
-                <li><Link to="/about">Hakkımızda</Link></li>
-                <li><a href="#">Gizlilik Politikası</a></li>
-                <li><a href="#">Hizmet Şartları</a></li>
-              </ul>
+              <h4>Hakkında</h4>
+              <Link to="/about">Hakkımızda</Link>
+              <a href="#">Gizlilik Politikası</a>
+              <a href="#">Hizmet Şartları</a>
             </div>
             <div className="footer-col">
-              <p className="footer-col-title">Temas etmek</p>
-              <ul>
-                <li><a href="mailto:merhaba@kedi.ai">merhaba@kedi.ai</a></li>
-              </ul>
+              <h4>Temas etmek</h4>
+              <a href="mailto:info@kedimhangicins.com">info@kedimhangicins.com</a>
             </div>
           </div>
         </div>
-        <p className="footer-copy">© 2025 kedi.ai · Tüm hakları saklıdır.</p>
+        <div className="footer-bottom">
+          <p>© 2026 Kedi.ai Tüm Hakları saklıdır.</p>
+        </div>
       </footer>
     </div>
   );
