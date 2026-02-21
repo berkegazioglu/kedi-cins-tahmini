@@ -1,6 +1,4 @@
-# Python dependencies
-torch==2.5.1
-torchvision==0.20.1
+# Python dependencies (torch/torchvision installed separately in Dockerfile)
 ultralytics==8.3.0
 Pillow==10.4.0
 numpy==1.24.3
@@ -14,11 +12,7 @@ uvicorn[standard]==0.32.0
 python-multipart==0.0.12
 python-dotenv==1.0.1
 
-# Ensemble model extras
+# Inference extras
 scipy>=1.10.0
 scikit-learn>=1.3.0
-matplotlib>=3.7.0
-seaborn>=0.12.0
-
-# Transformer models (for Super Ensemble)
 timm>=0.9.0

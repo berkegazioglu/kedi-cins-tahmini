@@ -25,7 +25,7 @@ WORKDIR /app
 # ── Python bağımlılıkları (CPU PyTorch) ───────
 COPY requirements.txt .
 RUN pip install --no-cache-dir \
-    torch torchvision --index-url https://download.pytorch.org/whl/cpu \
+    torch==2.5.1+cpu torchvision==0.20.1+cpu --index-url https://download.pytorch.org/whl/cpu \
     && pip install --no-cache-dir -r requirements.txt
 
 # ── Frontend dist (stage 1'den kopyala) ───────
