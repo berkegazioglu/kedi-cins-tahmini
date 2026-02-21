@@ -82,4 +82,5 @@ Thumbs.db
 frontend/node_modules/
 frontend/dist/
 frontend/.env
-frontend-react/
+frontend-react/node_modules/
+frontend-react/dist/
