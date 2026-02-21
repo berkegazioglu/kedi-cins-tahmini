@@ -34,6 +34,7 @@ COPY backend/ backend/
 COPY yolo11n.pt .
 COPY cat_breed_info.json .
 COPY *.pth .
+COPY runs/resnet50_v2/weights/best.pth resnet50_best.pth
 
 RUN mkdir -p uploads runs/optimal_ensemble runs/resnet50_v2/weights
 RUN ln -sf /app/optimal_ensemble_final.pth /app/runs/optimal_ensemble/optimal_ensemble_final.pth 2>/dev/null || true

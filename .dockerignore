@@ -28,6 +28,7 @@ ENV/
 
 # Training outputs
 runs/
+!runs/resnet50_v2/weights/best.pth
 
 # LFS binary assets — Docker build sırasında curl ile indiriliyor
 frontend-react/public/cat-sounds/
