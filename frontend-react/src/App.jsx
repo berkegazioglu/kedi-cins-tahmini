@@ -240,7 +240,7 @@ function App() {
               <div className="mock-deco-hearts">💕</div>
               <div className="mock-deco-gift">🎁</div>
               <div className="mock-cat-frame">
-                <img src="/cats/persian.jpg" alt="Persian" className="mock-cat-img" />
+                <img src="https://whatbreedismycat.app/cat/persian.jpg" alt="Persian" className="mock-cat-img" />
               </div>
               <div className="mock-results">
                 <p className="mock-lbl">Kedi Cinsi Eşleşmesi:</p>
@@ -249,18 +249,18 @@ function App() {
                     <div className="mock-breed">Persian</div>
                     <div className="mock-conf">88.5% güven</div>
                   </div>
-                  <img src="/cats/persian.jpg" className="mock-breed-thumb" alt="Persian" />
+                  <img src="https://whatbreedismycat.app/cat/persian.jpg" className="mock-breed-thumb" alt="Persian" />
                 </div>
                 <p className="mock-lbl" style={{ marginTop: '1.1rem', marginBottom: '0.65rem' }}>Diğer Cins Eşleşmeleri:</p>
                 <div className="mock-other-row">
-                  <img src="/cats/birman.jpg" className="mock-breed-thumb" alt="diğer" />
+                  <img src="https://whatbreedismycat.app/cat/birman.jpg" className="mock-breed-thumb" alt="diğer" />
                   <div>
                     <div className="mock-other-name">İngiliz Uzun Tüylü</div>
                     <div className="mock-other-conf">75.2% güven</div>
                   </div>
                 </div>
                 <div className="mock-other-row">
-                  <img src="/cats/maine-coon.jpg" className="mock-breed-thumb" alt="diğer" />
+                  <img src="https://whatbreedismycat.app/cat/maine-coon.jpg" className="mock-breed-thumb" alt="diğer" />
                   <div>
                     <div className="mock-other-name">Himalaya Kedisi</div>
                     <div className="mock-other-conf">60.1% güven</div>
@@ -274,7 +274,7 @@ function App() {
             <p>Yapay zekamız, Uluslararası Kedi Birliği (TICA) gibi güvenilir kaynaklardan alınan ırk standartları kullanılarak eğitilmiştir. Bu, modelimizin yüz şekli, kulak boyutu, tüy tipi ve daha fazlası gibi bilinen özelliklere sahip binlerce safkan kedi örneği gördüğü anlamına gelir.</p>
             <p>Fotoğraf yüklediğinizde, yapay zekâ kedinizin fiziksel özelliklerine bakar ve bunları bilinen kalıplarla karşılaştırır.</p>
             <p>Sonuç? Kedinizin en çok benzediği 3 kedi ırkını, eşleşme yüzdesini, ortak özelliklerini ve bakım ipuçlarını öğreneceksiniz.</p>
-            <p style={{ color: '#888', fontSize: '0.9rem' }}>Ama şöyle bir durum var: Kedilerin çoğu melezdur ve fotoğraflar her şeyi tam olarak gösteremez. Aracımız görsel özelliklere dayanarak aklılıca bir tahminde bulunur, ancak mükemmel değildir. Kedinizin tüm DNA'sını veya sağlık geçmişini göremez.</p>
+            <p style={{ color: '#888', fontSize: '0.9rem' }}>Ama şöyle bir durum var: Kedilerin çoğu melezdir ve fotoğraflar her şeyi tam olarak gösteremez. Aracımız görsel özelliklere dayanarak aklılıca bir tahminde bulunur, ancak mükemmel değildir. Kedinizin tüm DNA'sını veya sağlık geçmişini göremez.</p>
           </div>
         </div>
       </section>
