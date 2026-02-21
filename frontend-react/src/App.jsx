@@ -142,6 +142,14 @@ function App() {
 
   const maxIdx = Math.max(0, SAMPLE_CATS.length - VISIBLE_COUNT);
 
+  // Carousel otomatik ilerleme — 3 saniyede bir sola kayar, sona gelince basa döner
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCarouselIdx(i => (i >= maxIdx ? 0 : i + 1));
+    }, 3000);
+    return () => clearInterval(timer);
+  }, [maxIdx]);
+
   return (
     <div className="page">
       {/* ── NAVBAR ── */}
@@ -220,7 +228,7 @@ function App() {
                 </div>
               ))}
             </div>
-            <button className="car-btn" onClick={() => setCarouselIdx(i => Math.min(i + 1, maxIdx))} disabled={carouselIdx === maxIdx}>›</button>
+            <button className="car-btn" onClick={() => setCarouselIdx(i => (i >= maxIdx ? 0 : i + 1))}>›</button>
           </div>
           <div className="car-dots">
             {Array.from({ length: maxIdx + 1 }).map((_, i) => (
