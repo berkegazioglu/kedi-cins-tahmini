@@ -1,69 +1,54 @@
-version: '3.8'
-
 services:
-  # ResNet50 App (Default)
-  resnet50:
+  # FastAPI Backend
+  backend:
     build: .
-    container_name: kedi-resnet50
+    container_name: kedi-backend
     ports:
-      - "8501:8501"
+      - "8002:8000"
     volumes:
-      - ./runs/resnet50_v2/weights/best.pth:/app/runs/resnet50_v2/weights/best.pth:ro
+      - ./backend:/app/backend
+      - ./yolo11n.pt:/app/yolo11n.pt:ro
+      - ./optimal_ensemble_final.pth:/app/optimal_ensemble_final.pth:ro
+      - ./EfficientNetB0_best.pth:/app/EfficientNetB0_best.pth:ro
+      - ./MobileNetV3_best.pth:/app/MobileNetV3_best.pth:ro
+      - ./cat_breed_info.json:/app/cat_breed_info.json:ro
       - ./uploads:/app/uploads
     environment:
       - PYTHONUNBUFFERED=1
-    command: ["streamlit", "run", "app_resnet50.py", "--server.port=8501", "--server.address=0.0.0.0", "--server.headless=true"]
+      - PYTHONPATH=/app
+    command: ["python", "-m", "uvicorn", "backend.api.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     restart: unless-stopped
     deploy:
       resources:
+        limits:
+          cpus: '4'
+          memory: 8G
         reservations:
           devices:
             - driver: nvidia
               count: 1
               capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
   
-  # Ensemble App (3 CNN Models)
-  ensemble:
-    build: .
-    container_name: kedi-ensemble
+  # Frontend (React + Vite)
+  frontend:
+    image: node:20-alpine
+    container_name: kedi-frontend
+    working_dir: /app
     ports:
-      - "8502:8501"
+      - "5173:5173"
     volumes:
-      - ./runs/ensemble:/app/runs/ensemble:ro
-      - ./uploads:/app/uploads
+      - ./frontend:/app
+      - /app/node_modules
+    command: sh -c "npm install && npm run dev -- --host"
     environment:
-      - PYTHONUNBUFFERED=1
-    command: ["streamlit", "run", "app_ensemble.py", "--server.port=8501", "--server.address=0.0.0.0", "--server.headless=true"]
+      - NODE_ENV=development
+      - VITE_API_URL=http://localhost:8000
+    depends_on:
+      - backend
     restart: unless-stopped
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
-    profiles:
-      - ensemble
-  
-  # Super Ensemble App (5 Models - Dengeli Yol)
-  super-ensemble:
-    build: .
-    container_name: kedi-super-ensemble
-    ports:
-      - "8503:8501"
-    volumes:
-      - ./runs/super_ensemble:/app/runs/super_ensemble:ro
-      - ./uploads:/app/uploads
-    environment:
-      - PYTHONUNBUFFERED=1
-    command: ["streamlit", "run", "app_ensemble.py", "--server.port=8501", "--server.address=0.0.0.0", "--server.headless=true"]
-    restart: unless-stopped
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
-    profiles:
-      - super

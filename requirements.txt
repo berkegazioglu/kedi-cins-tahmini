@@ -2,12 +2,17 @@
 torch==2.5.1
 torchvision==0.20.1
 ultralytics==8.3.0
-streamlit==1.39.0
 Pillow==10.4.0
 numpy==1.24.3
 opencv-python-headless==4.9.0.80
 pyyaml==6.0.1
 tqdm==4.66.1
+
+# FastAPI and server
+fastapi==0.115.0
+uvicorn[standard]==0.32.0
+python-multipart==0.0.12
+python-dotenv==1.0.1
 
 # Ensemble model extras
 scipy>=1.10.0

@@ -50,3 +50,9 @@ archive/
 # Temp files
 *.tmp
 *.bak
+
+# Node
+node_modules/
+dist/
+.next/
+frontend-react/dist/

@@ -1,0 +1,426 @@
+{
+  "overall": {
+    "accuracy": 0.6467271727172718,
+    "macro_precision": 0.3006482360416197,
+    "macro_recall": 0.1976980749321298,
+    "macro_f1": 0.2148455721933576,
+    "weighted_precision": 0.6006657071141978,
+    "weighted_recall": 0.6467271727172718,
+    "weighted_f1": 0.5967236901210088
+  },
+  "per_class": [
+    {
+      "class": "Persian",
+      "precision": 0.8108747044917257,
+      "recall": 0.8532338308457711,
+      "f1_score": 0.8315151515151514,
+      "support": 804
+    },
+    {
+      "class": "Sphynx - Hairless Cat",
+      "precision": 0.85,
+      "recall": 0.8095238095238095,
+      "f1_score": 0.8292682926829269,
+      "support": 42
+    },
+    {
+      "class": "Domestic Short Hair",
+      "precision": 0.7041796000866238,
+      "recall": 0.9197623986422779,
+      "f1_score": 0.7976613925344453,
+      "support": 10606
+    },
+    {
+      "class": "Bengal",
+      "precision": 0.7990196078431373,
+      "recall": 0.657258064516129,
+      "f1_score": 0.7212389380530974,
+      "support": 496
+    },
+    {
+      "class": "Snowshoe",
+      "precision": 0.6277777777777778,
+      "recall": 0.6953846153846154,
+      "f1_score": 0.6598540145985401,
+      "support": 325
+    },
+    {
+      "class": "Siamese",
+      "precision": 0.5906593406593407,
+      "recall": 0.7439446366782007,
+      "f1_score": 0.6584992343032159,
+      "support": 578
+    },
+    {
+      "class": "Cornish Rex",
+      "precision": 0.7241379310344828,
+      "recall": 0.6,
+      "f1_score": 0.65625,
+      "support": 35
+    },
+    {
+      "class": "Ragdoll",
+      "precision": 0.5725552050473186,
+      "recall": 0.6797752808988764,
+      "f1_score": 0.6215753424657534,
+      "support": 534
+    },
+    {
+      "class": "Dilute Tortoiseshell",
+      "precision": 0.5385656292286874,
+      "recall": 0.6307448494453248,
+      "f1_score": 0.581021897810219,
+      "support": 631
+    },
+    {
+      "class": "Himalayan",
+      "precision": 0.5845410628019324,
+      "recall": 0.46360153256704983,
+      "f1_score": 0.5170940170940171,
+      "support": 261
+    },
+    {
+      "class": "Scottish Fold",
+      "precision": 0.7142857142857143,
+      "recall": 0.39473684210526316,
+      "f1_score": 0.5084745762711864,
+      "support": 76
+    },
+    {
+      "class": "Dilute Calico",
+      "precision": 0.540590405904059,
+      "recall": 0.4535603715170279,
+      "f1_score": 0.4932659932659933,
+      "support": 646
+    },
+    {
+      "class": "Calico",
+      "precision": 0.5432780847145487,
+      "recall": 0.4250720461095101,
+      "f1_score": 0.47696038803556995,
+      "support": 694
+    },
+    {
+      "class": "Russian Blue",
+      "precision": 0.49107142857142855,
+      "recall": 0.4411764705882353,
+      "f1_score": 0.46478873239436613,
+      "support": 374
+    },
+    {
+      "class": "Domestic Long Hair",
+      "precision": 0.3775322283609576,
+      "recall": 0.45555555555555555,
+      "f1_score": 0.41289023162134947,
+      "support": 900
+    },
+    {
+      "class": "Burmese",
+      "precision": 0.5625,
+      "recall": 0.2608695652173913,
+      "f1_score": 0.35643564356435636,
+      "support": 69
+    },
+    {
+      "class": "Nebelung",
+      "precision": 0.36,
+      "recall": 0.3,
+      "f1_score": 0.3272727272727273,
+      "support": 30
+    },
+    {
+      "class": "Abyssinian",
+      "precision": 0.5789473684210527,
+      "recall": 0.21568627450980393,
+      "f1_score": 0.3142857142857143,
+      "support": 51
+    },
+    {
+      "class": "Exotic Shorthair",
+      "precision": 0.4888888888888889,
+      "recall": 0.23157894736842105,
+      "f1_score": 0.3142857142857143,
+      "support": 95
+    },
+    {
+      "class": "Bombay",
+      "precision": 0.3686635944700461,
+      "recall": 0.21798365122615804,
+      "f1_score": 0.273972602739726,
+      "support": 367
+    },
+    {
+      "class": "Maine Coon",
+      "precision": 0.4358974358974359,
+      "recall": 0.1795774647887324,
+      "f1_score": 0.2543640897755611,
+      "support": 284
+    },
+    {
+      "class": "Havana",
+      "precision": 0.5454545454545454,
+      "recall": 0.16216216216216217,
+      "f1_score": 0.25,
+      "support": 37
+    },
+    {
+      "class": "American Shorthair",
+      "precision": 0.6461538461538462,
+      "recall": 0.11898016997167139,
+      "f1_score": 0.20095693779904308,
+      "support": 1059
+    },
+    {
+      "class": "Domestic Medium Hair",
+      "precision": 0.3173277661795407,
+      "recall": 0.13855970829535097,
+      "f1_score": 0.19289340101522845,
+      "support": 1097
+    },
+    {
+      "class": "British Shorthair",
+      "precision": 0.3,
+      "recall": 0.13157894736842105,
+      "f1_score": 0.18292682926829268,
+      "support": 114
+    },
+    {
+      "class": "Norwegian Forest Cat",
+      "precision": 0.22666666666666666,
+      "recall": 0.14655172413793102,
+      "f1_score": 0.17801047120418845,
+      "support": 116
+    },
+    {
+      "class": "Devon Rex",
+      "precision": 0.6666666666666666,
+      "recall": 0.08333333333333333,
+      "f1_score": 0.14814814814814814,
+      "support": 24
+    },
+    {
+      "class": "Selkirk Rex",
+      "precision": 1.0,
+      "recall": 0.0625,
+      "f1_score": 0.11764705882352941,
+      "support": 16
+    },
+    {
+      "class": "Manx",
+      "precision": 0.26262626262626265,
+      "recall": 0.06310679611650485,
+      "f1_score": 0.10176125244618396,
+      "support": 412
+    },
+    {
+      "class": "Oriental Short Hair",
+      "precision": 0.45454545454545453,
+      "recall": 0.050505050505050504,
+      "f1_score": 0.0909090909090909,
+      "support": 99
+    },
+    {
+      "class": "Extra-Toes Cat - Hemingway Polydactyl",
+      "precision": 0.3548387096774194,
+      "recall": 0.046413502109704644,
+      "f1_score": 0.08208955223880599,
+      "support": 237
+    },
+    {
+      "class": "Egyptian Mau",
+      "precision": 0.2,
+      "recall": 0.01639344262295082,
+      "f1_score": 0.030303030303030307,
+      "support": 61
+    },
+    {
+      "class": "American Bobtail",
+      "precision": 0.5,
+      "recall": 0.01507537688442211,
+      "f1_score": 0.02926829268292683,
+      "support": 199
+    },
+    {
+      "class": "American Curl",
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1_score": 0.0,
+      "support": 30
+    },
+    {
+      "class": "American Wirehair",
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1_score": 0.0,
+      "support": 4
+    },
+    {
+      "class": "Applehead Siamese",
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1_score": 0.0,
+      "support": 27
+    },
+    {
+      "class": "Balinese",
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1_score": 0.0,
+      "support": 51
+    },
+    {
+      "class": "Birman",
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1_score": 0.0,
+      "support": 46
+    },
+    {
+      "class": "Burmilla",
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1_score": 0.0,
+      "support": 2
+    },
+    {
+      "class": "Canadian Hairless",
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1_score": 0.0,
+      "support": 1
+    },
+    {
+      "class": "Chartreux",
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1_score": 0.0,
+      "support": 17
+    },
+    {
+      "class": "Chausie",
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1_score": 0.0,
+      "support": 5
+    },
+    {
+      "class": "Chinchilla",
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1_score": 0.0,
+      "support": 1
+    },
+    {
+      "class": "Cymric",
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1_score": 0.0,
+      "support": 4
+    },
+    {
+      "class": "Japanese Bobtail",
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1_score": 0.0,
+      "support": 26
+    },
+    {
+      "class": "Javanese",
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1_score": 0.0,
+      "support": 5
+    },
+    {
+      "class": "Korat",
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1_score": 0.0,
+      "support": 14
+    },
+    {
+      "class": "LaPerm",
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1_score": 0.0,
+      "support": 4
+    },
+    {
+      "class": "Munchkin",
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1_score": 0.0,
+      "support": 37
+    },
+    {
+      "class": "Ocicat",
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1_score": 0.0,
+      "support": 24
+    },
+    {
+      "class": "Oriental Long Hair",
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1_score": 0.0,
+      "support": 8
+    },
+    {
+      "class": "Oriental Tabby",
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1_score": 0.0,
+      "support": 21
+    },
+    {
+      "class": "Pixiebob",
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1_score": 0.0,
+      "support": 23
+    },
+    {
+      "class": "Ragamuffin",
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1_score": 0.0,
+      "support": 27
+    },
+    {
+      "class": "Siberian",
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1_score": 0.0,
+      "support": 38
+    },
+    {
+      "class": "Silver",
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1_score": 0.0,
+      "support": 19
+    },
+    {
+      "class": "Singapura",
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1_score": 0.0,
+      "support": 5
+    },
+    {
+      "class": "Somali",
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1_score": 0.0,
+      "support": 8
+    },
+    {
+      "class": "Tabby",
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1_score": 0.0,
+      "support": 0
+    }
+  ]
+}

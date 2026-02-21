@@ -1,0 +1,37 @@
+﻿.pr-wrap { background: #fff; border-radius: 16px; border: 1px solid #e8e8f0; box-shadow: 0 4px 24px rgba(0,0,0,0.07); overflow: hidden; max-width: 860px; margin: 0 auto; }
+.pr-header { display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 1.75rem; border-bottom: 1px solid #f0f0f5; }
+.pr-header h2 { font-size: 1.25rem; font-weight: 700; color: #1a1a2e; }
+.pr-new-btn { background: none; border: 2px solid #e91e8c; color: #e91e8c; border-radius: 20px; padding: 0.4rem 1rem; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.pr-new-btn:hover { background: #e91e8c; color: #fff; }
+.pr-alert { padding: 0.75rem 1.75rem; font-size: 0.875rem; font-weight: 500; }
+.pr-alert strong { display: block; margin-bottom: 0.2rem; }
+.pr-alert-danger { background: #fff0f3; color: #c0177a; border-left: 4px solid #e91e8c; }
+.pr-alert-warn { background: #fffbea; color: #92610a; border-left: 4px solid #f59e0b; }
+.pr-alert-success { background: #f0fdf4; color: #166534; border-left: 4px solid #22c55e; }
+.pr-body { display: grid; grid-template-columns: 260px 1fr; gap: 0; }
+.pr-left { padding: 1.75rem; border-right: 1px solid #f0f0f5; }
+.pr-photo { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 12px; margin-bottom: 1rem; }
+.pr-top-card { background: #f9f9fc; border-radius: 12px; padding: 1rem; }
+.pr-match-lbl { font-size: 0.72rem; color: #888; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.3rem; }
+.pr-breed-name { font-size: 1.2rem; font-weight: 800; color: #1a1a2e; margin-bottom: 0.2rem; }
+.pr-conf-val { font-size: 1rem; font-weight: 700; color: #e91e8c; margin-bottom: 0.6rem; }
+.pr-bar-wrap { background: #e8e8f0; border-radius: 4px; height: 6px; overflow: hidden; }
+.pr-bar { height: 100%; background: linear-gradient(90deg, #e91e8c, #f06292); border-radius: 4px; transition: width 0.6s ease; }
+.pr-bar-other { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
+.pr-right { padding: 1.75rem; }
+.pr-others { margin-bottom: 1.5rem; }
+.pr-others h3, .pr-breed-info h3 { font-size: 0.9rem; font-weight: 700; color: #1a1a2e; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem; }
+.pr-other-row { margin-bottom: 0.85rem; }
+.pr-other-info { display: flex; justify-content: space-between; margin-bottom: 0.3rem; }
+.pr-other-name { font-size: 0.9rem; font-weight: 600; color: #1a1a2e; }
+.pr-other-conf { font-size: 0.875rem; font-weight: 700; color: #7c3aed; }
+.pr-breed-info { background: #f9f9fc; border-radius: 12px; padding: 1.25rem; }
+.pr-breed-info p { font-size: 0.875rem; color: #4a4a6a; line-height: 1.65; margin-bottom: 1rem; }
+.pr-info-tags { display: flex; flex-direction: column; gap: 0.5rem; }
+.pr-tag-row { display: flex; gap: 0.75rem; font-size: 0.85rem; }
+.pr-tag-lbl { font-weight: 700; color: #1a1a2e; min-width: 65px; }
+@media (max-width: 600px) {
+  .pr-body { grid-template-columns: 1fr; }
+  .pr-left { border-right: none; border-bottom: 1px solid #f0f0f5; padding-bottom: 1.25rem; }
+  .pr-photo { max-height: 220px; aspect-ratio: auto; }
+}

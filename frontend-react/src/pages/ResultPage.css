@@ -1,0 +1,295 @@
+/* ── RESULT PAGE ── */
+
+.rp-page {
+  min-height: 100vh;
+  background: #f8f8fb;
+  font-family: 'Inter', sans-serif;
+}
+
+/* ── HEADER ── */
+.rp-header {
+  padding: 6rem 1.5rem 1.5rem;
+  text-align: center;
+}
+.rp-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #1a1a2e;
+  margin-bottom: 0.6rem;
+}
+.rp-disclaimer {
+  font-size: 0.88rem;
+  color: #888;
+  max-width: 640px;
+  margin: 0 auto;
+}
+.rp-disclaimer a {
+  color: #2563eb;
+  text-decoration: none;
+}
+.rp-disclaimer a:hover {
+  text-decoration: underline;
+}
+
+/* ── CONTAINER ── */
+.rp-container {
+  max-width: 940px;
+  margin: 0 auto;
+  padding: 0 1.5rem 2rem;
+}
+
+/* ── MAIN CARD ── */
+.rp-card {
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+/* ── TOP ROW: photo + matches ── */
+.rp-top-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2rem;
+  padding: 2rem 2rem 1.5rem;
+  align-items: start;
+}
+
+/* Uploaded photo */
+.rp-photo-col {
+  flex-shrink: 0;
+}
+.rp-photo {
+  width: 220px;
+  height: 260px;
+  object-fit: cover;
+  border-radius: 14px;
+  display: block;
+  border: 1px solid #eee;
+}
+
+/* Matches column */
+.rp-matches-col {
+  padding-top: 0.25rem;
+}
+
+.rp-match-section-lbl {
+  font-size: 0.82rem;
+  color: #999;
+  margin-bottom: 0.6rem;
+  font-weight: 500;
+}
+
+/* Top match ─ pembe çerçeve */
+.rp-top-match {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 2.5px solid #e91e8c;
+  border-radius: 14px;
+  padding: 0.85rem 1rem;
+  background: #fff;
+}
+.rp-top-breed {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #1a1a2e;
+  margin: 0 0 0.25rem;
+}
+.rp-top-pct {
+  font-size: 0.9rem;
+  color: #e91e8c;
+  font-weight: 600;
+  margin: 0;
+}
+.rp-breed-thumb {
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 10px;
+  flex-shrink: 0;
+  border: 1px solid #f0f0f4;
+}
+
+/* Other matches */
+.rp-other-match {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid #f4f4f8;
+}
+.rp-other-match:last-child {
+  border-bottom: none;
+}
+.rp-other-thumb {
+  width: 44px;
+  height: 44px;
+  object-fit: cover;
+  border-radius: 8px;
+  flex-shrink: 0;
+  border: 1px solid #f0f0f4;
+}
+.rp-thumb-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f4ff;
+  font-size: 1.3rem;
+}
+.rp-other-breed {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0 0 0.1rem;
+}
+.rp-other-pct {
+  font-size: 0.8rem;
+  color: #e91e8c;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* ── INFO BLOCK ── */
+.rp-info-block {
+  border-top: 1px solid #f0f0f4;
+  padding: 2rem;
+}
+
+.rp-breed-heading {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #1a1a2e;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+.rp-paw {
+  font-size: 1.1rem;
+}
+
+.rp-section {
+  margin-bottom: 1.5rem;
+}
+
+/* Section label (pink) */
+.rp-section-lbl {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #e91e8c;
+  margin-bottom: 0.75rem;
+  text-transform: none;
+}
+
+/* Info grid 2x4 */
+.rp-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem 2rem;
+}
+.rp-info-cell {
+  font-size: 0.88rem;
+  color: #444;
+  line-height: 1.7;
+}
+.rp-info-key {
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-right: 0.25rem;
+}
+
+/* Two column: health + temperament */
+.rp-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.rp-two-item {}
+
+.rp-body-text {
+  font-size: 0.88rem;
+  color: #555;
+  line-height: 1.75;
+  margin: 0;
+}
+
+/* Inline pink link styling */
+.rp-inline-link {
+  color: #e91e8c;
+}
+
+/* Diet grid */
+.rp-diet-grid {
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem 2rem;
+}
+.rp-diet-cell {}
+.rp-diet-key {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 0.3rem;
+}
+.rp-diet-val {
+  font-size: 0.85rem;
+  color: #555;
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* ── ACTION BUTTONS ── */
+.rp-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1.5rem 1.5rem 3rem;
+  flex-wrap: wrap;
+}
+.rp-btn-download {
+  background: #e91e8c;
+  color: #fff;
+  border: none;
+  border-radius: 30px;
+  padding: 0.7rem 1.8rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+.rp-btn-download:hover {
+  background: #c0176d;
+  transform: translateY(-1px);
+}
+.rp-btn-reset {
+  background: #e91e8c;
+  color: #fff;
+  border: none;
+  border-radius: 30px;
+  padding: 0.7rem 1.8rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+.rp-btn-reset:hover {
+  background: #c0176d;
+  transform: translateY(-1px);
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 680px) {
+  .rp-top-row {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+  .rp-photo {
+    width: 100%;
+    height: 220px;
+  }
+  .rp-two-col {
+    grid-template-columns: 1fr;
+  }
+  .rp-info-grid {
+    grid-template-columns: 1fr;
+  }
+}

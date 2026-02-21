@@ -26,15 +26,11 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application files
-COPY app_resnet50.py .
-COPY app_ensemble.py .
-COPY predict_resnet50.py .
-COPY predict_ensemble.py .
-COPY ensemble_model.py .
-COPY transformer_models.py .
-COPY augmentation_utils.py .
-COPY show_classes.py .
+COPY backend/ backend/
+COPY frontend/ frontend/
 COPY yolo11n.pt .
+COPY cat_breed_info.json .
+COPY *.pth .
 
 # Copy Streamlit config
 COPY .streamlit .streamlit
@@ -42,15 +38,20 @@ COPY .streamlit .streamlit
 # Create necessary directories
 RUN mkdir -p runs/resnet50_v2/weights
 RUN mkdir -p runs/ensemble/weights
-RUN mkdir -p runs/super_ensemble/weights
+RUN mkdir -p runs/optimal_ensemble/weights
+RUN mkdir -p uploads
 
 # Copy the trained models (will be added by user)
 # COPY runs/resnet50_v2/weights/best.pth runs/resnet50_v2/weights/
 # COPY runs/ensemble/weights/*.pth runs/ensemble/weights/
 # COPY runs/super_ensemble/weights/*.pth runs/super_ensemble/weights/
 
-# Expose Streamlit port
-EXPOSE 8501
+# Expose FastAPI port
+EXPOSE 8000
 
-# Default: Run ResNet50 app (can be overridden)
-CMD ["streamlit", "run", "app_resnet50.py", "--server.port=8501", "--server.address=0.0.0.0", "--server.headless=true", "--server.enableCORS=false", "--server.enableXsrfProtection=false"]
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD python -c "import requests; requests.get('http://localhost:8000/health')" || exit 1
+
+# Default: Run FastAPI backend
+CMD ["python", "-m", "uvicorn", "backend.api.main:app", "--host", "0.0.0.0", "--port", "8000"]

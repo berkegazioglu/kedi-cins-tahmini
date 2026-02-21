@@ -1,0 +1,358 @@
+.prediction-results {
+  width: 100%;
+  max-width: 800px;
+  margin: 30px auto;
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.wild-warning {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+  color: white;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+  font-size: 1.1rem;
+}
+
+.wild-warning strong {
+  font-weight: 700;
+}
+
+.model-info {
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.model-badge {
+  display: inline-block;
+  padding: 6px 15px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.top-prediction {
+  text-align: center;
+  padding: 25px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border-radius: 10px;
+  margin-bottom: 25px;
+}
+
+.top-prediction h3 {
+  margin: 0 0 15px 0;
+  color: #555;
+  font-size: 1.2rem;
+}
+
+.breed-name {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.confidence {
+  font-size: 1.3rem;
+  color: #667eea;
+  font-weight: 600;
+}
+
+.entropy-info {
+  margin-top: 10px;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.other-predictions {
+  margin-bottom: 25px;
+}
+
+.other-predictions h4 {
+  margin-bottom: 15px;
+  color: #555;
+  font-size: 1.1rem;
+}
+
+.prediction-item {
+  display: grid;
+  grid-template-columns: 200px 1fr 80px;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 12px;
+  padding: 10px;
+  background: #f9f9f9;
+  border-radius: 8px;
+}
+
+.breed-label {
+  font-weight: 600;
+  color: #333;
+}
+
+.confidence-bar {
+  height: 24px;
+  background: #e0e0e0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.confidence-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  transition: width 0.5s ease;
+}
+
+.confidence-value {
+  text-align: right;
+  font-weight: 600;
+  color: #667eea;
+}
+
+/* Breed Info Section */
+.breed-info-section {
+  margin-top: 30px;
+}
+
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.tabs button {
+  padding: 10px 20px;
+  border: 2px solid #e0e0e0;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #666;
+}
+
+.tabs button:hover {
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.tabs button.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-color: #667eea;
+}
+
+.tab-content {
+  background: #f9f9f9;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.info-card h4 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #333;
+  font-size: 1.2rem;
+}
+
+.info-card p {
+  margin: 10px 0;
+  color: #555;
+  line-height: 1.6;
+}
+
+.info-card ul {
+  margin: 10px 0;
+  padding-left: 20px;
+}
+
+.info-card li {
+  margin: 8px 0;
+  color: #555;
+  line-height: 1.6;
+}
+
+/* Compare Mode */
+.compare-mode {
+  max-width: 1200px;
+}
+
+.compare-mode h2 {
+  text-align: center;
+  margin-bottom: 25px;
+  color: #333;
+}
+
+.consensus-section {
+  text-align: center;
+  padding: 20px;
+  background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+  border-radius: 10px;
+  margin-bottom: 30px;
+}
+
+.consensus-section h3 {
+  margin: 0 0 15px 0;
+  color: #fff;
+}
+
+.consensus-section .breed-name {
+  color: #fff;
+}
+
+.models-comparison {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.model-result {
+  background: #f9f9f9;
+  padding: 20px;
+  border-radius: 10px;
+  border: 2px solid #e0e0e0;
+}
+
+.model-result.error {
+  border-color: #ff6b6b;
+}
+
+.model-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.model-header h4 {
+  margin: 0;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.timing {
+  font-size: 0.9rem;
+  color: #666;
+  background: #e0e0e0;
+  padding: 4px 10px;
+  border-radius: 12px;
+}
+
+.wild-warning-small {
+  background: #ff6b6b;
+  color: white;
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.top-prediction-small {
+  text-align: center;
+  padding: 15px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
+
+.breed-name-small {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 5px;
+}
+
+.confidence-small {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+}
+
+.other-predictions-small {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.prediction-item-small {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: white;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.breed-label-small {
+  font-weight: 600;
+  color: #333;
+}
+
+.confidence-value-small {
+  color: #667eea;
+  font-weight: 600;
+}
+
+.error-message {
+  color: #ff6b6b;
+  text-align: center;
+  font-weight: 600;
+}
+
+.timing-summary {
+  background: #f9f9f9;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.timing-summary h4 {
+  margin: 0 0 15px 0;
+  color: #333;
+}
+
+.timing-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.timing-item:last-child {
+  border-bottom: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .prediction-item {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .confidence-value {
+    text-align: left;
+  }
+
+  .tabs {
+    justify-content: flex-start;
+  }
+
+  .tabs button {
+    font-size: 0.85rem;
+    padding: 8px 15px;
+  }
+
+  .models-comparison {
+    grid-template-columns: 1fr;
+  }
+}

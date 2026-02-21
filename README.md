@@ -14,6 +14,7 @@ Derin öğrenme tabanlı gelişmiş kedi cinsi sınıflandırma sistemi. 59 fark
 - [Kurulum](#kurulum)
   - [Docker ile Kurulum (Önerilen)](#docker-ile-kurulum-önerilen)
   - [Manuel Kurulum](#manuel-kurulum)
+- [Backend & Frontend Başlatma](#️-backend--frontend-başlatma)
 - [Kullanım](#kullanım)
 - [Model Eğitimi](#model-eğitimi)
 - [Performans](#performans)
@@ -232,6 +233,100 @@ pip install -r requirements.txt
 # Streamlit web uygulaması (ResNet50 - en iyi model)
 streamlit run app_resnet50.py
 ```
+
+---
+
+## 🖥️ Backend & Frontend Başlatma
+
+Bu proje iki bileşenden oluşur: **Flask API (Backend)** ve **React/Vite (Frontend)**. Her ikisinin de ayrı ayrı başlatılması gerekir.
+
+### 1️⃣ Backend'i Başlatın (Flask API — Port 8002)
+
+Backend, model tahminlerini REST API olarak sunar. Docker ile çalışır:
+
+```bash
+# Docker image'ı build edin (ilk seferde)
+docker build -t kedi-backend .
+
+# Container'ı başlatın (Port 8002)
+docker run -d --name kedi-backend -p 8002:8002 kedi-backend
+
+# Zaten oluşturulduysa, sadece yeniden başlatın
+docker restart kedi-backend
+
+# Logları takip edin
+docker logs -f kedi-backend
+```
+
+Backend çalışıyor mu kontrol edin:
+```bash
+curl http://localhost:8002/health
+# veya tarayıcıda: http://localhost:8002/health
+```
+
+> **Not:** Backend hazır olduğunda `"status": "ok"` yanıtı döner.
+
+---
+
+### 2️⃣ Frontend'i Başlatın (React/Vite — Port 5173)
+
+Frontend, `frontend-react/` klasöründeki React uygulamasıdır:
+
+```bash
+# frontend-react klasörüne gidin
+cd frontend-react
+
+# Bağımlılıkları yükleyin (ilk seferde)
+npm install
+
+# Geliştirme sunucusunu başlatın
+npm run dev
+```
+
+Tarayıcıda açın:
+```
+http://localhost:5173
+```
+
+**Windows PowerShell ile tek komutta:**
+```powershell
+Set-Location "frontend-react"; npm run dev
+```
+
+---
+
+### ⚡ Her İkisini Birden Başlatma
+
+```powershell
+# 1. Backend'i arka planda başlat
+docker restart kedi-backend
+
+# 2. Frontend'i başlat
+Set-Location "frontend-react"
+npm run dev
+```
+
+### 🛑 Durdurma
+
+```bash
+# Backend'i durdur
+docker stop kedi-backend
+
+# Frontend: terminalde Ctrl+C
+```
+
+### 🔧 Bağlantı Yapılandırması
+
+Frontend, backend API adresini `frontend-react/src/config.js` dosyasından okur:
+
+```js
+// frontend-react/src/config.js
+export const API_BASE_URL = "http://localhost:8002";
+```
+
+Farklı bir port kullanıyorsanız bu dosyayı güncelleyin.
+
+---
 
 ## 💻 Kullanım
 

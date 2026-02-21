@@ -11,12 +11,40 @@ import torch.nn as nn
 from torchvision import models, transforms
 import os
 import numpy as np
+from scipy.stats import entropy
+import json
 
 try:
     from ultralytics import YOLO
     YOLO_AVAILABLE = True
 except:
     YOLO_AVAILABLE = False
+
+# Vahşi kedi türleri listesi
+WILD_CATS = [
+    "aslan", "kaplan", "leopar", "çita", "jaguar",
+    "puma", "vaşak", "çöl kedisi", "serval", "oselot",
+    "kara ayak kedi", "pallas kedisi", "balıkçı kedisi",
+    "lion", "tiger", "leopard", "cheetah", "jaguar",
+    "puma", "lynx", "serval", "ocelot", "caracal",
+    "sand cat", "fishing cat", "pallas cat", "black-footed cat"
+]
+
+# Entropi eşik değeri - bu değerin üzerinde vahşi kedi olabilir
+ENTROPY_THRESHOLD = 2.5  # Yüksek belirsizlik eşiği
+
+# Kedi cinsi bilgi kartları yolu
+BREED_INFO_PATH = 'cat_breed_info.json'
+
+@st.cache_resource
+def load_breed_info():
+    """Load cat breed information from JSON file"""
+    try:
+        with open(BREED_INFO_PATH, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except Exception as e:
+        st.warning(f"Cins bilgileri yüklenemedi: {e}")
+        return {}
 
 # Sayfa yapılandırması
 st.set_page_config(
@@ -217,8 +245,51 @@ def preprocess_image(image):
     image_tensor = transform(image).unsqueeze(0)
     return image_tensor
 
+def calculate_entropy(probabilities):
+    """Calculate Shannon entropy of probability distribution"""
+    # probabilities: torch tensor of shape (num_classes,)
+    probs = probabilities.cpu().numpy()
+    # Normalize to ensure sum = 1
+    probs = probs / probs.sum()
+    # Add small epsilon to avoid log(0)
+    probs = probs + 1e-10
+    return entropy(probs, base=2)
+
+def detect_wild_cat(probabilities, entropy_value, top_predictions, threshold=ENTROPY_THRESHOLD):
+    """Detect if image might be a wild cat based on entropy and predictions"""
+    # Yüksek entropi = yüksek belirsizlik = muhtemelen vahşi kedi
+    is_high_entropy = entropy_value > threshold
+    
+    # En yüksek tahmin güveni düşükse şüpheli
+    max_confidence = top_predictions[0] * 100
+    is_low_confidence = max_confidence < 40
+    
+    # Tahmin edilen cinsler arasında vahşi kedi benzeri isimler var mı kontrol et
+    # (bazı kullanıcılar vahşi kedi resimlerini yükleyebilir)
+    
+    # Vahşi kedi tespiti
+    is_wild = is_high_entropy and is_low_confidence
+    
+    warning_msg = None
+    if is_wild:
+        warning_msg = (
+            f"⚠️ **Vahşi Kedi Uyarısı**: Bu görsel bir ev kedisi değil, "
+            f"vahşi bir kedi türü (aslan, kaplan, vaşak, leopar vb.) olabilir. "
+            f"Sistem sadece ev kedisi cinsleri için eğitilmiştir.\n\n"
+            f"📊 Entropi: {entropy_value:.3f} (Eşik: {threshold})\n"
+            f"📉 Maksimum Güven: %{max_confidence:.2f}"
+        )
+    elif is_high_entropy:
+        warning_msg = (
+            f"⚠️ **Yüksek Belirsizlik**: Model bu görselde kararsız. "
+            f"Bu bir vahşi kedi, kedi olmayan bir hayvan veya belirsiz bir görsel olabilir.\n\n"
+            f"📊 Entropi: {entropy_value:.3f} (Eşik: {threshold})"
+        )
+    
+    return is_wild, warning_msg, entropy_value
+
 def predict_breed(model, image, class_names, device, top_k=5):
-    """Predict cat breed with top-k results"""
+    """Predict cat breed with top-k results and entropy-based wild cat detection"""
     try:
         # Preprocess
         image_tensor = preprocess_image(image)
@@ -230,6 +301,16 @@ def predict_breed(model, image, class_names, device, top_k=5):
             probabilities = torch.nn.functional.softmax(outputs, dim=1)
             top_probs, top_indices = torch.topk(probabilities, top_k)
         
+        # Calculate entropy for wild cat detection
+        entropy_value = calculate_entropy(probabilities[0])
+        
+        # Detect wild cat
+        is_wild, wild_warning, _ = detect_wild_cat(
+            probabilities[0], 
+            entropy_value, 
+            top_probs[0]
+        )
+        
         # Format results
         results = []
         for prob, idx in zip(top_probs[0], top_indices[0]):
@@ -238,10 +319,10 @@ def predict_breed(model, image, class_names, device, top_k=5):
                 'confidence': prob.item() * 100
             })
         
-        return results
+        return results, entropy_value, is_wild, wild_warning
     except Exception as e:
         st.error(f"Tahmin yapılırken hata oluştu: {e}")
-        return None
+        return None, None, None, None
 
 def main():
     # Header
@@ -330,6 +411,11 @@ def main():
                 ⚠️ **Önemli:** 
                 - Sistem önce kedi tespiti yapar
                 - Kedi olmayan görseller reddedilir
+                - Vahşi kediler (aslan, kaplan, vaşak vb.) otomatik tespit edilir
+                
+                🦁 **Vahşi Kedi Tespiti:**
+                - Entropi analizi ile vahşi kedi türleri tespit edilir
+                - Sistem sadece ev kedisi cinsleri için eğitilmiştir
             """)
         else:
             st.error("❌ Model yüklenemedi!")
@@ -381,12 +467,15 @@ def main():
                         if cat_confidence < 0.5 and yolo_model is not None and not skip_detection:
                             st.warning(f"⚠️ Düşük güvenle kedi tespit edildi (%{cat_confidence*100:.1f}). Sonuçlar yanıltıcı olabilir.")
                         
-                        results = predict_breed(model, image, class_names, device, top_k=5)
+                        results, entropy_val, is_wild_cat, wild_warning = predict_breed(model, image, class_names, device, top_k=5)
                         
                         if results:
                             st.session_state['results'] = results
                             st.session_state['cat_confidence'] = cat_confidence
                             st.session_state['detection_msg'] = detection_msg
+                            st.session_state['entropy_value'] = entropy_val
+                            st.session_state['is_wild_cat'] = is_wild_cat
+                            st.session_state['wild_warning'] = wild_warning
     
     with col2:
         st.markdown("### 🎯 Tahmin Sonuçları")
@@ -394,10 +483,28 @@ def main():
         if 'results' in st.session_state:
             results = st.session_state['results']
             cat_conf = st.session_state.get('cat_confidence', 1.0)
+            entropy_val = st.session_state.get('entropy_value', 0.0)
+            is_wild_cat = st.session_state.get('is_wild_cat', False)
+            wild_warning = st.session_state.get('wild_warning', None)
+            
+            # Show wild cat warning if detected
+            if wild_warning:
+                st.error(wild_warning)
+                st.markdown("""<div class='prediction-box' style='border-left: 5px solid #FF6B6B; background-color: #3D1F1F !important;'>
+                    <h3 style='color: #FF6B6B;'>🦁 Vahşi Kedi Tespiti</h3>
+                    <p>Bu görsel muhtemelen bir <strong>vahşi kedi türü</strong> (aslan, kaplan, leopar, vaşak, çita vb.) içeriyor.</p>
+                    <p>Sistem yalnızca <strong>59 ev kedisi cinsi</strong> için eğitilmiştir ve vahşi kedileri tanıyamaz.</p>
+                    <p><strong>Önerilen Aksiyon:</strong> Lütfen bir ev kedisi fotoğrafı yükleyin.</p>
+                </div>""", unsafe_allow_html=True)
             
             # Show cat detection confidence if available
             if cat_conf < 1.0:
                 st.info(f"🔍 Kedi Tespit Güveni: %{cat_conf*100:.1f}")
+            
+            # Show entropy value
+            if entropy_val > 0:
+                entropy_color = "🔴" if entropy_val > ENTROPY_THRESHOLD else "🟢"
+                st.info(f"{entropy_color} Entropi Değeri: {entropy_val:.3f} (Eşik: {ENTROPY_THRESHOLD})")
             
             # Top prediction
             top_result = results[0]
@@ -435,6 +542,61 @@ def main():
                 st.info("ℹ️ Orta düzey güvenle tahmin edildi.")
             else:
                 st.warning("⚠️ Düşük güven - Bu cins için daha fazla eğitim gerekebilir.")
+            
+            # Detailed breed information card
+            st.markdown("---")
+            st.markdown("### 📖 Detaylı Cins Bilgileri")
+            
+            breed_info = load_breed_info()
+            top_breed = results[0]['breed']
+            
+            if top_breed in breed_info:
+                info = breed_info[top_breed]
+                
+                # Create tabs for different information categories
+                tab1, tab2, tab3, tab4, tab5 = st.tabs(["📋 Genel Bilgi", "🏥 Sağlık", "🍽️ Beslenme", "✨ Bakım", "💝 Karakter"])
+                
+                with tab1:
+                    st.markdown(f"**Türkçe İsim:** {info.get('name_tr', 'N/A')}")
+                    st.markdown(f"**Menşei:** {info.get('origin', 'N/A')}")
+                    st.markdown(f"**Boyut:** {info.get('size', 'N/A')}")
+                    st.markdown(f"**Ağırlık:** {info.get('weight', 'N/A')}")
+                    st.markdown(f"**Yaşam Süresi:** {info.get('lifespan', 'N/A')}")
+                    
+                    # Activity and grooming indicators
+                    col1, col2, col3 = st.columns(3)
+                    with col1:
+                        st.metric("Aktivite Seviyesi", info.get('activity_level', 'N/A'))
+                    with col2:
+                        st.metric("Bakım İhtiyacı", info.get('grooming', 'N/A'))
+                    with col3:
+                        st.metric("Tüy Dökme", info.get('shedding', 'N/A'))
+                    
+                    # Compatibility indicators
+                    col4, col5 = st.columns(2)
+                    with col4:
+                        st.metric("Çocuk Dostu", info.get('child_friendly', 'N/A'))
+                    with col5:
+                        st.metric("Diğer Hayvanlarla", info.get('pet_friendly', 'N/A'))
+                
+                with tab2:
+                    st.markdown("#### 🏥 Sağlık Özellikleri")
+                    st.write(info.get('health', 'Bilgi mevcut değil.'))
+                
+                with tab3:
+                    st.markdown("#### 🍽️ Beslenme Önerileri")
+                    st.write(info.get('nutrition', 'Bilgi mevcut değil.'))
+                
+                with tab4:
+                    st.markdown("#### ✨ Bakım Gereksinimleri")
+                    st.write(info.get('care', 'Bilgi mevcut değil.'))
+                
+                with tab5:
+                    st.markdown("#### 💝 Karakter Özellikleri")
+                    st.write(info.get('character', 'Bilgi mevcut değil.'))
+            else:
+                st.info(f"🔍 {top_breed} için detaylı bilgi henüz eklenmemiş.")
+                
         else:
             st.info("👆 Bir fotoğraf yükleyin ve 'Tahmin Et' butonuna tıklayın.")
     

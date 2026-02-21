@@ -1,0 +1,78 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Training outputs
+runs/
+wandb/
+*.log
+
+# Data
+data/
+images_split/
+*.csv
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Legacy
+legacy/
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Scripts
+scripts/
+*.sh
+*.ps1
+
+# Temporary
+uploads/
+temp/
+tmp/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Model weights (will be explicitly copied)
+*.pth
+*.pt
+!yolo11n.pt
+!optimal_ensemble_final.pth
+!EfficientNetB0_best.pth
+!MobileNetV3_best.pth
+
+# Frontend build
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend-react/
