@@ -15,6 +15,9 @@ const PrivacyPolicyPage = () => {
           <ul className="nav-links">
             <li><Link to="/">Anasayfa</Link></li>
             <li><Link to="/cat-translator">Kedi Çevirmeni</Link></li>
+            <li><Link to="/#how-it-works">Nasıl Çalışır</Link></li>
+            <li><Link to="/#breeds-table">Kedi Irkları Tablosu</Link></li>
+            <li><Link to="/#faq">SSS</Link></li>
           </ul>
         </div>
       </nav>
