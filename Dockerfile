@@ -35,10 +35,10 @@ COPY yolo11n.pt .
 COPY cat_breed_info.json .
 COPY *.pth .
 
-# Runs klasöründeki model ağırlıkları (varsa)
-COPY runs/ runs/
+RUN mkdir -p uploads runs/optimal_ensemble runs/resnet50_v2/weights
 
-RUN mkdir -p uploads
+# optimal_ensemble_final.pth zaten kök dizinde — symlink ile beklenen yola bağla
+RUN ln -sf /app/optimal_ensemble_final.pth /app/runs/optimal_ensemble/optimal_ensemble_final.pth 2>/dev/null || true
 
 # ── HF Spaces zorunlu port: 7860 ──────────────
 EXPOSE 7860
