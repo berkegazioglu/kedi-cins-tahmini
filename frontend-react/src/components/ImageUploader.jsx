@@ -29,13 +29,32 @@ const ImageUploader = ({ onImageSelect, onPredict, isLoading, preview, results, 
   };
   const handleChange = (e) => { if (e.target.files?.[0]) handleFile(e.target.files[0]); };
 
-  const handleSample = async (src) => {
-    try {
-      const res = await fetch(src);
-      const blob = await res.blob();
-      const file = new File([blob], 'sample.jpg', { type: 'image/jpeg' });
-      handleFile(file);
-    } catch { /* ignore network errors */ }
+  const handleSample = (src) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      canvas.getContext('2d').drawImage(img, 0, 0);
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const file = new File([blob], 'sample.jpg', { type: 'image/jpeg' });
+          handleFile(file);
+        }
+      }, 'image/jpeg', 0.92);
+    };
+    img.onerror = () => {
+      // CORS engellendi — doğrudan fetch ile dene
+      fetch(src)
+        .then(r => r.blob())
+        .then(blob => {
+          const file = new File([blob], 'sample.jpg', { type: 'image/jpeg' });
+          handleFile(file);
+        })
+        .catch(() => {});
+    };
+    img.src = src;
   };
 
   /* ─── STATE: RESULT ─── */

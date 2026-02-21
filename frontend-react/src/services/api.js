@@ -21,8 +21,9 @@ class ApiService {
     });
     
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || 'Prediction failed');
+      let detail = `HTTP ${response.status}`;
+      try { const e = await response.json(); detail = e.detail || detail; } catch {}
+      throw new Error(detail);
     }
     
     return await response.json();
@@ -41,8 +42,9 @@ class ApiService {
     });
     
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || 'Detection failed');
+      let detail = `HTTP ${response.status}`;
+      try { const e = await response.json(); detail = e.detail || detail; } catch {}
+      throw new Error(detail);
     }
     
     return await response.json();
