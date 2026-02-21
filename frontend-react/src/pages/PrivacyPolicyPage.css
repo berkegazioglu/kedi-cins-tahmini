@@ -1,0 +1,35 @@
+.pp-page { min-height: 100vh; background: #fff; font-family: inherit; }
+
+/* Hero */
+.pp-hero { padding: 5rem 1.5rem 2rem; background: #fff; }
+.pp-container { max-width: 800px; margin: 0 auto; }
+.pp-title { font-size: 2.5rem; font-weight: 800; color: #0f172a; margin: 0 0 0.5rem; }
+.pp-effective { font-size: 0.9rem; color: #94a3b8; margin: 0; }
+
+/* Intro */
+.pp-content { padding: 2rem 1.5rem 4rem; }
+.pp-intro { color: #475569; line-height: 1.75; margin-bottom: 1rem; font-size: 0.95rem; }
+
+/* Sections */
+.pp-section { margin-bottom: 2.5rem; padding-bottom: 2.5rem; border-bottom: 1px solid #f1f5f9; }
+.pp-section:last-child { border-bottom: none; }
+.pp-section-title { font-size: 1.2rem; font-weight: 700; color: #0f172a; margin: 0 0 0.875rem; }
+.pp-section p { color: #475569; line-height: 1.75; margin: 0 0 0.75rem; font-size: 0.95rem; }
+.pp-section p:last-child { margin-bottom: 0; }
+.pp-section a { color: #0ea5e9; text-decoration: none; }
+.pp-section a:hover { text-decoration: underline; }
+
+/* List */
+.pp-list { margin: 0.5rem 0 0.75rem 0; padding-left: 1.5rem; }
+.pp-list li { color: #475569; line-height: 1.75; margin-bottom: 0.3rem; font-size: 0.95rem; }
+
+/* Contact box */
+.pp-contact-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1rem 1.25rem; margin: 0.75rem 0; }
+.pp-contact-box p { margin: 0.2rem 0 !important; font-size: 0.9rem; color: #475569; }
+.pp-contact-box a { color: #0ea5e9; text-decoration: none; }
+
+/* Responsive */
+@media (max-width: 640px) {
+  .pp-title { font-size: 1.75rem; }
+  .pp-section-title { font-size: 1.05rem; }
+}

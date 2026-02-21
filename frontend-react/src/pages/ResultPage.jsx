@@ -287,7 +287,7 @@ export default function ResultPage() {
             <div className="footer-col">
               <h4>Hakkında</h4>
               <Link to="/about">Hakkımızda</Link>
-              <a href="#">Gizlilik Politikası</a>
+              <Link to="/privacy-policy">Gizlilik Politikası</Link>
               <a href="#">Hizmet Şartları</a>
             </div>
             <div className="footer-col">
