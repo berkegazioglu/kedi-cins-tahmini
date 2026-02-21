@@ -23,7 +23,7 @@ const PrivacyPolicyPage = () => {
       <section className="pp-hero">
         <div className="pp-container">
           <h1 className="pp-title">Gizlilik Politikası</h1>
-          <p className="pp-effective">Yürürlük Tarihi: 29 Mayıs 2025</p>
+          <p className="pp-effective">Yürürlük Tarihi: 22 Şubat 2026</p>
         </div>
       </section>
 
