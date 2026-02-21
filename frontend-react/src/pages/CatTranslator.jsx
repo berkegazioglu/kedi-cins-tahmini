@@ -168,7 +168,7 @@ export default function CatTranslator() {
       <nav className={`navbar ${navScrolled ? 'scrolled' : ''}`}>
         <div className="nav-inner">
           <Link to="/" className="nav-logo">
-            <img src="/kedi-ai-logo.png" alt="Kedi.ai" className="nav-logo-img" /> Kedi.ai
+            <img src="/kedi-ai-logo.svg" alt="Kedi.ai" className="nav-logo-img" /> Kedi.ai
           </Link>
           <ul className="nav-links">
             <li><Link to="/">Anasayfa</Link></li>
@@ -535,7 +535,7 @@ export default function CatTranslator() {
       <footer className="footer">
         <div className="footer-inner">
           <div className="footer-brand">
-            <div className="footer-logo"><img src="/kedi-ai-logo.png" alt="Kedi.ai" className="footer-logo-img" /> Kedi.ai</div>
+            <div className="footer-logo"><img src="/kedi-ai-logo.svg" alt="Kedi.ai" className="footer-logo-img" /> Kedi.ai</div>
             <p>Kedinizin fotoğrafından ırkını bulmanıza yardımcı olan ücretsiz bir yapay zeka aracıdır.</p>
           </div>
           <div className="footer-cols">

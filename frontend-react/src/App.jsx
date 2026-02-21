@@ -148,7 +148,7 @@ function App() {
       <nav className={`navbar ${navScrolled ? 'scrolled' : ''}`}>
         <div className="nav-inner">
           <a href="#" className="nav-logo" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
-            <img src="/kedi-ai-logo.png" alt="Kedi.ai" className="nav-logo-img" /> Kedi.ai
+            <img src="/kedi-ai-logo.svg" alt="Kedi.ai" className="nav-logo-img" /> Kedi.ai
           </a>
           <ul className="nav-links">
             <li><a href="#hero" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Anasayfa</a></li>
@@ -172,9 +172,9 @@ function App() {
             </p>
             <div className="hero-proof">
               <div className="proof-avatars">
-                <img src="/avatar-balinese.jpg" alt="Balinese" />
-                <img src="/avatar-bombay.jpg" alt="Bombay" />
-                <img src="/avatar-siamese.jpg" alt="Siamese" />
+                <img src="https://images.unsplash.com/photo-1548247416-ec66f4900b2e?w=80&h=80&fit=crop&auto=format" alt="Balinese" />
+                <img src="https://images.unsplash.com/photo-1573865526739-10659fec78a5?w=80&h=80&fit=crop&auto=format" alt="Bombay" />
+                <img src="https://images.unsplash.com/photo-1513360371669-4adf3dd7dff8?w=80&h=80&fit=crop&auto=format" alt="Siamese" />
               </div>
               <span>Kaggle'den toplanan 100.000'den fazla kedi fotoğrafı ile eğitildi.</span>
             </div>
@@ -457,7 +457,7 @@ function App() {
       <footer className="footer">
         <div className="footer-inner">
           <div className="footer-brand">
-            <div className="footer-logo"><img src="/kedi-ai-logo.png" alt="Kedi.ai" className="footer-logo-img" /> Kedi.ai</div>
+            <div className="footer-logo"><img src="/kedi-ai-logo.svg" alt="Kedi.ai" className="footer-logo-img" /> Kedi.ai</div>
             <p>Kedinizin fotoğrafından ırkını bulmanıza yardımcı olan ücretsiz bir yapay zeka aracıdır.</p>
           </div>
           <div className="footer-cols">
