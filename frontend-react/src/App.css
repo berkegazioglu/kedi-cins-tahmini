@@ -47,11 +47,10 @@ button { cursor: pointer; font-family: inherit; border: none; }
 /* SAMPLES */
 .samples-section { padding: 5rem 1.5rem; background: var(--bg-light); }
 .carousel-wrap { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
-.carousel-track { flex: 1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; }
-.car-item { text-align: center; animation: carFadeIn 0.5s ease; }
-@keyframes carFadeIn { from { opacity: 0; transform: translateX(18px); } to { opacity: 1; transform: translateX(0); } }
-.car-item img { width: 100%; aspect-ratio: 3/4; object-fit: cover; border-radius: var(--radius); margin-bottom: 0.6rem; transition: transform 0.3s ease; }
-.car-item img:hover { transform: scale(1.03); }
+.carousel-viewport { flex: 1; overflow: hidden; }
+.carousel-track { display: flex; gap: 0; transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+.car-item { flex: 0 0 calc(100% / 4); padding: 0 0.625rem; text-align: center; box-sizing: border-box; }
+.car-item img { width: 100%; aspect-ratio: 3/4; object-fit: cover; border-radius: var(--radius); margin-bottom: 0.6rem; }
 .car-item p { font-size: 0.9rem; font-weight: 600; color: var(--navy); }
 .car-btn { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--border); background: #fff; font-size: 1.4rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; color: var(--navy); }
 .car-btn:hover:not(:disabled) { border-color: var(--pink); color: var(--pink); }
@@ -166,7 +165,6 @@ button { cursor: pointer; font-family: inherit; border: none; }
   .trust-grid { grid-template-columns: repeat(2,1fr); }
   .footer-inner { grid-template-columns: 1fr; gap: 2rem; }
   .footer-cols { grid-template-columns: repeat(2,1fr); }
-  .carousel-track { grid-template-columns: repeat(2,1fr); }
 }
 @media (max-width: 600px) {
   .nav-links { display: none; }
@@ -175,5 +173,4 @@ button { cursor: pointer; font-family: inherit; border: none; }
   .section-title { font-size: 1.5rem; }
   .trust-grid { grid-template-columns: 1fr; }
   .footer-cols { grid-template-columns: 1fr; }
-  .carousel-track { grid-template-columns: repeat(2,1fr); }
 }

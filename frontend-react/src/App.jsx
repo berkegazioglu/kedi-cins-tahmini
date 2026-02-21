@@ -220,13 +220,15 @@ function App() {
           </p>
           <div className="carousel-wrap">
             <button className="car-btn" onClick={() => setCarouselIdx(i => Math.max(i - 1, 0))} disabled={carouselIdx === 0}>‹</button>
-            <div className="carousel-track">
-              {SAMPLE_CATS.slice(carouselIdx, carouselIdx + VISIBLE_COUNT).map(cat => (
-                <div className="car-item" key={`${carouselIdx}-${cat.id}`}>
-                  <img src={cat.img} alt={cat.breed} />
-                  <p>{cat.breed} <strong className="conf-pink">%{cat.confidence}</strong></p>
-                </div>
-              ))}
+            <div className="carousel-viewport">
+              <div className="carousel-track" style={{ transform: `translateX(-${carouselIdx * (100 / VISIBLE_COUNT)}%)` }}>
+                {SAMPLE_CATS.map(cat => (
+                  <div className="car-item" key={cat.id}>
+                    <img src={cat.img} alt={cat.breed} />
+                    <p>{cat.breed} <strong className="conf-pink">%{cat.confidence}</strong></p>
+                  </div>
+                ))}
+              </div>
             </div>
             <button className="car-btn" onClick={() => setCarouselIdx(i => (i >= maxIdx ? 0 : i + 1))}>›</button>
           </div>
