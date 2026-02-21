@@ -12,8 +12,8 @@ RUN mkdir -p public/cat-sounds
 RUN npm install --legacy-peer-deps
 RUN VITE_API_URL="" npm run build
 
-# ── Stage 2: Python backend ────────────────────
-FROM python:3.11-slim
+# ── Stage 2: Python backend (conda for reliable CPU torch) ────
+FROM continuumio/miniconda3:latest
 
 RUN apt-get update && apt-get install -y \
     libgl1-mesa-glx libglib2.0-0 libsm6 libxext6 \
@@ -22,13 +22,12 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-# ── Python bağımlılıkları (CPU PyTorch) ───────
+# ── PyTorch CPU via conda (reliable, no pytorch.org HTTP issues) ─
+RUN conda install -y pytorch torchvision cpuonly -c pytorch \
+    && conda clean -afy
+
+# ── Remaining Python deps ─────────────────────
 COPY requirements.txt .
-# Install torch CPU wheels via direct URL (avoids index lookup failures)
-RUN pip install --no-cache-dir \
-    "https://download.pytorch.org/whl/cpu/torch-2.5.1%2Bcpu-cp311-cp311-linux_x86_64.whl" \
-    "https://download.pytorch.org/whl/cpu/torchvision-0.20.1%2Bcpu-cp311-cp311-linux_x86_64.whl"
-# Install remaining deps
 RUN pip install --no-cache-dir -r requirements.txt
 
 # ── Frontend dist (stage 1'den kopyala) ───────
