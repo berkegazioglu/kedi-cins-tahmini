@@ -24,12 +24,12 @@ WORKDIR /app
 
 # ── Python bağımlılıkları (CPU PyTorch) ───────
 COPY requirements.txt .
-# Install torch CPU-only (no CUDA, smaller wheel ~200MB)
-RUN pip install --no-cache-dir --timeout 120 \
-    torch torchvision \
-    --index-url https://download.pytorch.org/whl/cpu
+# Install torch CPU wheels via direct URL (avoids index lookup failures)
+RUN pip install --no-cache-dir \
+    "https://download.pytorch.org/whl/cpu/torch-2.5.1%2Bcpu-cp311-cp311-linux_x86_64.whl" \
+    "https://download.pytorch.org/whl/cpu/torchvision-0.20.1%2Bcpu-cp311-cp311-linux_x86_64.whl"
 # Install remaining deps
-RUN pip install --no-cache-dir --timeout 120 -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # ── Frontend dist (stage 1'den kopyala) ───────
 COPY --from=frontend-builder /app/frontend-react/dist /app/frontend-react/dist
