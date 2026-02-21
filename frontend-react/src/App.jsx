@@ -141,11 +141,44 @@ function App() {
   };
 
   const maxIdx = Math.max(0, SAMPLE_CATS.length - VISIBLE_COUNT);
+  const trackRef = useRef(null);
+
+  // Transition'ı geçici kapatarak zıpla, sonra yeniden aç (sonsuz döngü)
+  const goTo = (newIdx) => {
+    const isWrap = (carouselIdx === 0 && newIdx === maxIdx) ||
+                   (carouselIdx === maxIdx && newIdx === 0);
+    if (isWrap && trackRef.current) {
+      trackRef.current.style.transition = 'none';
+      setCarouselIdx(newIdx);
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => {
+          if (trackRef.current)
+            trackRef.current.style.transition = '';
+        })
+      );
+    } else {
+      setCarouselIdx(newIdx);
+    }
+  };
 
   // Carousel otomatik ilerleme — 3 saniyede bir sola kayar, sona gelince basa döner
   useEffect(() => {
     const timer = setInterval(() => {
-      setCarouselIdx(i => (i >= maxIdx ? 0 : i + 1));
+      setCarouselIdx(i => {
+        if (i >= maxIdx) {
+          // Sona geldi: geçişi kapat, başa zıpla
+          if (trackRef.current) {
+            trackRef.current.style.transition = 'none';
+            requestAnimationFrame(() =>
+              requestAnimationFrame(() => {
+                if (trackRef.current) trackRef.current.style.transition = '';
+              })
+            );
+          }
+          return 0;
+        }
+        return i + 1;
+      });
     }, 3000);
     return () => clearInterval(timer);
   }, [maxIdx]);
@@ -219,9 +252,9 @@ function App() {
             Her kedi için özelliklerini, görünümünü ve sağlığı hakkında ayrıntılı bilgi içeren 3 olası ırk eşleşmesi elde edilir.
           </p>
           <div className="carousel-wrap">
-            <button className="car-btn" onClick={() => setCarouselIdx(i => Math.max(i - 1, 0))} disabled={carouselIdx === 0}>‹</button>
+            <button className="car-btn" onClick={() => goTo(carouselIdx <= 0 ? maxIdx : carouselIdx - 1)}>‹</button>
             <div className="carousel-viewport">
-              <div className="carousel-track" style={{ transform: `translateX(-${carouselIdx * (100 / VISIBLE_COUNT)}%)` }}>
+              <div className="carousel-track" ref={trackRef} style={{ transform: `translateX(-${carouselIdx * (100 / VISIBLE_COUNT)}%)` }}>
                 {SAMPLE_CATS.map(cat => (
                   <div className="car-item" key={cat.id}>
                     <img src={cat.img} alt={cat.breed} />
@@ -230,7 +263,7 @@ function App() {
                 ))}
               </div>
             </div>
-            <button className="car-btn" onClick={() => setCarouselIdx(i => (i >= maxIdx ? 0 : i + 1))}>›</button>
+            <button className="car-btn" onClick={() => goTo(carouselIdx >= maxIdx ? 0 : carouselIdx + 1)}>›</button>
           </div>
           <div className="car-dots">
             {Array.from({ length: 8 }).map((_, i) => {
@@ -239,7 +272,7 @@ function App() {
                 <button
                   key={i}
                   className={`dot ${i === activeDot ? 'active' : ''}`}
-                  onClick={() => setCarouselIdx(Math.round((i / 7) * maxIdx))}
+                  onClick={() => goTo(Math.round((i / 7) * maxIdx))}
                 />
               );
             })}
