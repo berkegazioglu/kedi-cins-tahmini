@@ -24,10 +24,11 @@ WORKDIR /app
 
 # ── Python bağımlılıkları (CPU PyTorch) ───────
 COPY requirements.txt .
-# Install torch first (CPU-only, avoids ultralytics re-pulling CUDA torch)
+# Install torch CPU wheel first (must use +cpu suffix to match wheel filename in index)
 RUN pip install --no-cache-dir \
-    torch==2.5.1 torchvision==0.20.1 --index-url https://download.pytorch.org/whl/cpu
-# Install remaining deps (ultralytics will reuse already-installed torch)
+    "torch==2.5.1+cpu" "torchvision==0.20.1+cpu" \
+    --index-url https://download.pytorch.org/whl/cpu
+# Install remaining deps (torch already installed, ultralytics won't re-download it)
 RUN pip install --no-cache-dir -r requirements.txt
 
 # ── Frontend dist (stage 1'den kopyala) ───────
